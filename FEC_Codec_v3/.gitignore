@@ -1,0 +1,20 @@
+# Compiled binaries
+fec_bench_v3
+test_suite
+test_suite_ext
+test_pressure
+
+# Object files
+*.o
+*.a
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Generated graphs (reproducible from visualize_v3.py)
+graphs/
+graphs_v3/
+
+# macOS
+.DS_Store
