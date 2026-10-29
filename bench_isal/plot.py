@@ -112,6 +112,17 @@ if lat is not None:
     summary += ["", "*Cached ISA-L* = ISA-L whose decode matrix for this exact loss pattern is already cached, "
                 "so only the region multiply remains. Speedup < 1 there means the cached baseline wins.", ""]
 
+    # Best-available kernels: ISA-L's own dispatcher (GFNI where present) with and without m×m.
+    if {"isal_default", "hybrid_default"} <= set(t4.method):
+        summary += ["## Best available kernel (ISA-L dispatcher; GFNI if the CPU has it), 4 KB, median µs", "",
+                    "| code | m' | ISA-L total | ISA-L cached (region only) | m×m + ISA-L kernel | speedup vs ISA-L | vs cached ISA-L |",
+                    "|---|---|---|---|---|---|---|"]
+        for (n, k, ml), g in t4.groupby(["n", "k", "m_lost"]):
+            get = lambda me, col: g[g.method == me][col].iloc[0] / 1e3 if (g.method == me).any() else float("nan")
+            it, ir, ht = get("isal_default", "total_med_ns"), get("isal_default", "region_med_ns"), get("hybrid_default", "total_med_ns")
+            summary.append(f"| RS({n},{k}) | {ml} | {it:.2f} | {ir:.2f} | {ht:.2f} | {it / ht:.1f}× | {ir / ht:.2f}× |")
+        summary.append("")
+
     # ── fig 3: m' sweep ────────────────────────────────────────────────────
     big = dec[(dec.pkt == 4096)]
     cands = [c for c in [(32, 16), (36, 32), (20, 16)] if ((big.n == c[0]) & (big.k == c[1])).any()]
