@@ -45,9 +45,13 @@ echo ">> correctness tests"
 } > "$OUT/machine.txt"
 
 # One logical CPU per physical core, skipping core 0 (interrupts / OS noise).
-CPUS=$(lscpu -p=CPU,CORE,SOCKET | grep -v '^#' | sort -t, -k3,3n -k2,2n -k1,1n | awk -F, '!seen[$3","$2]++ {print $1}' | tail -n +2 | paste -sd, -)
-[ -z "$CPUS" ] && CPUS=0
-PIN=$(echo "$CPUS" | cut -d, -f1)
+# Override on hybrid CPUs (Intel 12th–14th gen P+E cores) to keep everything on P-cores, e.g.
+#   CPUS=2,4,6,8,10,12,14 PIN=2 ./run_all.sh
+if [ -z "${CPUS:-}" ]; then
+  CPUS=$(lscpu -p=CPU,CORE,SOCKET | grep -v '^#' | sort -t, -k3,3n -k2,2n -k1,1n | awk -F, '!seen[$3","$2]++ {print $1}' | tail -n +2 | paste -sd, -)
+  [ -z "$CPUS" ] && CPUS=0
+fi
+PIN=${PIN:-$(echo "$CPUS" | cut -d, -f1)}
 NCORES=$(echo "$CPUS" | tr ',' '\n' | wc -l)
 THREADS=$(python3 -c "n=$NCORES; s=[1,2,4,8,12,16,24,32,48,64]; print(','.join(str(x) for x in s if x<=n) + ('' if n in s else f',{n}'))")
 echo "pinned latency core: $PIN; throughput cores: $CPUS" | tee -a "$OUT/machine.txt"
