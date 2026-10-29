@@ -28,6 +28,7 @@
 
 #include "rs_fast.hpp"
 #include "isal_ref.hpp"
+#include "cm256_ref.hpp"
 #include "../FEC_Codec_v3/rs_codec.hpp"
 
 #include <pthread.h>
@@ -138,7 +139,7 @@ static bool pin_to(int cpu) {
 }
 
 // ── method descriptors ───────────────────────────────────────────────────────
-enum class Kind { V3, Ours, Isal, Hybrid };
+enum class Kind { V3, Ours, Isal, Hybrid, CM256 };
 struct Method { std::string name; Kind kind; GFSIMD::Isa isa; IsalRef::IsalKernel kern; };
 
 static std::vector<Method> methods_from(const std::string& spec) {
@@ -154,6 +155,7 @@ static std::vector<Method> methods_from(const std::string& spec) {
     if (a2) all.push_back({"hybrid_avx2", Kind::Hybrid, Isa::AVX2, IsalKernel::AVX2});
     if (a5) all.push_back({"hybrid_avx512", Kind::Hybrid, Isa::AVX512, IsalKernel::AVX512});
     all.push_back({"hybrid_default", Kind::Hybrid, Isa::Scalar, IsalKernel::Default});
+    if (a2) all.push_back({"cm256", Kind::CM256, Isa::AVX2, IsalKernel::AVX2});   // built with -mavx2
     if (spec == "all") {
         all.erase(std::remove_if(all.begin(), all.end(), [](const Method& m) { return m.name == "ours_scalar"; }), all.end());
         return all;
@@ -176,6 +178,20 @@ struct Workload {
     std::vector<uint8_t> G;
 
     uint8_t* pkt(int cw, int i) { return buf[cw].get() + static_cast<size_t>(i) * L; }
+
+    // cm256 uses its own generator, so it gets its own parity for the same data (lazy).
+    std::vector<std::vector<uint8_t>> cmpar;               // per codeword: m*L contiguous
+    uint8_t* cm(int cw, int r) { return cmpar[cw].data() + static_cast<size_t>(r) * L; }
+    void ensure_cm256() {
+        if (!cmpar.empty()) return;
+        Cm256Ref::Codec cc(n, k, L);
+        cmpar.assign(P, std::vector<uint8_t>(static_cast<size_t>(m) * L));
+        std::vector<uint8_t*> d(k);
+        for (int c = 0; c < P; ++c) {
+            for (int j = 0; j < k; ++j) d[j] = pkt(c, j);
+            cc.encode(d.data(), cmpar[c].data());
+        }
+    }
 
     Workload(int n_, int k_, int ml_, int L_, int P_, int npat, uint64_t seed)
         : n(n_), k(k_), m(n_ - k_), ml(ml_), L(L_), P(P_) {
@@ -214,12 +230,18 @@ struct Decoder {
     std::unique_ptr<RSCodec::CauchyCodec> v3;
     RSFast::Plan fp; IsalRef::Plan ip;
     std::vector<unsigned char> htbls;
+    std::unique_ptr<Cm256Ref::Codec> cm;
+    std::vector<uint8_t> cm_out;                 // encode output (m*L contiguous)
+    const std::vector<int>* cm_surv = nullptr;   // survivors of the pending decode (throughput)
+    uint8_t* cm_ptr[256]; int cm_idx[256];
 
     Decoder(const Method& m, const std::vector<uint8_t>& G, int n_, int k_, int L_) : M(m), n(n_), k(k_), L(L_) {
         if (M.kind == Kind::V3) v3 = std::make_unique<RSCodec::CauchyCodec>(n, k);
         if (M.kind == Kind::Ours || M.kind == Kind::Hybrid) fc = std::make_unique<RSFast::FastCauchy>(n, k, M.isa);
         if (M.kind == Kind::Isal) ic = std::make_unique<IsalRef::Codec>(G, n, k, M.kern);
         if (M.kind == Kind::Hybrid) htbls.resize(static_cast<size_t>(RSFast::MAX_M) * k * 32);
+        if (M.kind == Kind::CM256) { cm = std::make_unique<Cm256Ref::Codec>(n, k, L);
+                                     cm_out.resize(static_cast<size_t>(n - k) * L); }
     }
 
     // phase 1
@@ -229,6 +251,7 @@ struct Decoder {
             case Kind::Hybrid: fc->make_plan(surv.data(), (int)surv.size(), fp, false);
                                IsalRef::init_tables(M.kern, k, fp.nlost, fp.D, htbls.data()); return fp.nlost;
             case Kind::Isal:   ic->make_plan(surv.data(), (int)surv.size(), ip); return ip.nlost;
+            case Kind::CM256:  cm_surv = &surv; return 0;   // cm256 has no separate plan phase
             default: return 0;
         }
     }
@@ -243,6 +266,10 @@ struct Decoder {
                 IsalRef::run(M.kern, L, k, fp.nlost, htbls.data(), srcs, out);
                 break;
             }
+            case Kind::CM256:   // throughput mode only: decodes in place into recv[] (timing is data-independent)
+                for (int i = 0; i < k; ++i) { cm_ptr[i] = recv[i]; cm_idx[i] = (*cm_surv)[i]; }
+                cm->decode(cm_ptr, cm_idx, nullptr);
+                break;
             default: break;
         }
     }
@@ -250,6 +277,7 @@ struct Decoder {
 
     void encode(unsigned char** data, unsigned char** par) {
         if (M.kind == Kind::Isal) ic->encode(data, par, L);
+        else if (M.kind == Kind::CM256) cm->encode(data, cm_out.data());
         else if (fc) fc->encode(const_cast<const uint8_t* const*>(data), par, L);
     }
 };
@@ -281,10 +309,11 @@ static int run_latency(const Args& a, FILE* out) {
         {
             Workload W(n, k, 1, L, a.pool, 1, a.seed);
             for (auto& M : methods) {
-                if (M.kind != Kind::Ours && M.kind != Kind::Isal) continue;
+                if (M.kind != Kind::Ours && M.kind != Kind::Isal && M.kind != Kind::CM256) continue;
                 Decoder D(M, W.G, n, k, L);
                 std::vector<std::vector<uint8_t>> par(m, std::vector<uint8_t>(L));
                 std::vector<unsigned char*> pp(m); for (int i = 0; i < m; ++i) pp[i] = par[i].data();
+                if (M.kind == Kind::CM256) { W.ensure_cm256(); for (int i = 0; i < m; ++i) pp[i] = D.cm_out.data() + static_cast<size_t>(i) * L; }
                 std::vector<uint64_t> t; t.reserve(a.iters);
                 for (int it = 0; it < a.warmup + a.iters; ++it) {
                     int c = it % W.P;
@@ -293,7 +322,8 @@ static int run_latency(const Args& a, FILE* out) {
                     set_cache_state(cold, pp.data(), m, L);
                     uint64_t t0 = now_ns(); D.encode(dp.data(), pp.data()); uint64_t t1 = now_ns();
                     if (it >= a.warmup) t.push_back(t1 - t0);
-                    if (it == 0) for (int i = 0; i < m; ++i) if (std::memcmp(pp[i], W.pkt(c, k + i), L)) ++errors;
+                    if (it == 0) for (int i = 0; i < m; ++i)
+                        if (std::memcmp(pp[i], M.kind == Kind::CM256 ? W.cm(c, i) : W.pkt(c, k + i), L)) ++errors;
                 }
                 double med = pct(t, 0.5), p99 = pct(t, 0.99);
                 double mean = std::accumulate(t.begin(), t.end(), 0.0) / t.size();
@@ -318,7 +348,24 @@ static int run_latency(const Args& a, FILE* out) {
                     bool ok = true;
                     set_cache_state(cold, recv.data(), static_cast<int>(surv.size()), L);
                     set_cache_state(cold, op.data(), ml, L);
-                    if (M.kind == Kind::V3) {
+                    if (M.kind == Kind::CM256) {
+                        // cm256 decodes in place: hand it copies of its parity (untimed)
+                        W.ensure_cm256();
+                        uint8_t* ptr[256]; int idx[256], oidx[256], r = 0;
+                        for (int i = 0; i < k; ++i) {
+                            idx[i] = surv[i];
+                            if (surv[i] < k) ptr[i] = W.pkt(c, surv[i]);
+                            else { std::memcpy(op[r], W.cm(c, surv[i] - k), L); ptr[i] = op[r++]; }
+                        }
+                        set_cache_state(cold, ptr, k, L);
+                        uint64_t t0 = now_ns();
+                        int rc = D.cm->decode(ptr, idx, oidx);
+                        uint64_t t1 = now_ns();
+                        ok &= rc == 0 && r == ml;
+                        for (int i = 0; i < k; ++i)
+                            if (idx[i] >= k) ok &= oidx[i] < k && std::memcmp(ptr[i], W.pkt(c, oidx[i]), L) == 0;
+                        if (it >= a.warmup) ttv.push_back(t1 - t0);
+                    } else if (M.kind == Kind::V3) {
                         RSCodec::Packets rp(k);
                         std::vector<int> ri(surv.begin(), surv.begin() + k);
                         for (int i = 0; i < k; ++i) rp[i].assign(recv[i], recv[i] + L);
@@ -387,6 +434,10 @@ static int run_throughput(const Args& a, FILE* out) {
                 pin_to(cpus[t]);
                 Workload W(n, k, ml, L, a.pool, 4096, a.seed + 1000 * t + ml);
                 Decoder D(M, W.G, n, k, L);
+                if (M.kind == Kind::CM256) {   // put cm256's own parity in the parity slots
+                    W.ensure_cm256();
+                    for (int c = 0; c < W.P; ++c) std::memcpy(W.pkt(c, k), W.cm(c, 0), static_cast<size_t>(n - k) * L);
+                }
                 const int m = n - k;
                 std::vector<std::vector<uint8_t>> ob(std::max(m, ml), std::vector<uint8_t>(L));
                 std::vector<unsigned char*> op_(ob.size()); for (size_t i = 0; i < ob.size(); ++i) op_[i] = ob[i].data();

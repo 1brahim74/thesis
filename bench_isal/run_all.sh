@@ -69,12 +69,12 @@ echo ">> [2/3] packet-size sweep (crossover)"
 SWEEP_PKTS=256,512,1024,2048,4096,8192,9216,16384,32768,65536
 [ "$QUICK" = 1 ] && SWEEP_PKTS=256,4096,65536
 SWEEP_METHODS=$(./bench_isal latency --configs 5:4 --ml 1 --pkts 64 --methods all --iters 1 --warmup 0 --pool 1 2>/dev/null \
-  | awk -F, 'NR>1 && $1=="decode" {print $2}' | grep -E '^(ours|isal|hybrid)_(avx2|avx512|default)$' | sort -u | paste -sd, -)
+  | awk -F, 'NR>1 && $1=="decode" {print $2}' | grep -E '^((ours|isal|hybrid)_(avx2|avx512|default)|cm256)$' | sort -u | paste -sd, -)
 ./bench_isal latency --configs 8:4,18:16,32:16,36:32 --ml 1,2 --pkts $SWEEP_PKTS \
   --methods "$SWEEP_METHODS" --iters $ITERS --warmup $WARM --pool 64 --cpu "$PIN" --out "$OUT/sweep.csv"
 
 echo ">> [3/3] multi-core throughput"
-TP_METHODS=$(echo "$SWEEP_METHODS" | tr ',' '\n' | grep -E '^(ours|isal)_' | paste -sd, -)
+TP_METHODS=$(echo "$SWEEP_METHODS" | tr ',' '\n' | grep -E '^(ours_|isal_|cm256)' | paste -sd, -)
 ./bench_isal throughput --configs 18:16,32:16,36:32 --ml 1,2 --pkts 4096 \
   --threads "$THREADS" --cpus "$CPUS" --methods "$TP_METHODS" --seconds $SECS --pool 64 \
   --out "$OUT/throughput.csv"

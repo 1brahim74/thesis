@@ -5,6 +5,7 @@
 
 #include "rs_fast.hpp"
 #include "isal_ref.hpp"
+#include "cm256_ref.hpp"
 #include "../FEC_Codec_v3/rs_codec.hpp"
 #include <cstdio>
 #include <random>
@@ -203,6 +204,47 @@ static void test_decoders(int n, int k, int len, int max_subsets) {
     CHECK(bad == 0, "decode RS(%d,%d) len=%d: %d failures over %zu subsets", n, k, len, bad, subsets.size());
 }
 
+// cm256: its own encoder, same data; every k-subset (small) or random subsets (large).
+static void test_cm256(int n, int k, int len, int max_subsets) {
+    if (!GFSIMD::isa_supported(Isa::AVX2)) return;
+    int m = n - k;
+    std::vector<std::vector<uint8_t>> data(k, std::vector<uint8_t>(len));
+    for (auto& d : data) for (auto& x : d) x = rng();
+    std::vector<uint8_t*> dp(k); for (int j = 0; j < k; ++j) dp[j] = data[j].data();
+    Cm256Ref::Codec cc(n, k, len);
+    std::vector<uint8_t> par(static_cast<size_t>(m) * len);
+    cc.encode(dp.data(), par.data());
+    std::vector<std::vector<int>> subsets;
+    std::vector<int> sel(n, 0); std::fill(sel.end() - k, sel.end(), 1);
+    long total = 0;
+    do { ++total; } while (total <= max_subsets && std::next_permutation(sel.begin(), sel.end()));
+    std::fill(sel.begin(), sel.end(), 0); std::fill(sel.end() - k, sel.end(), 1);
+    if (total <= max_subsets) {
+        do { std::vector<int> s; for (int i = 0; i < n; ++i) if (sel[i]) s.push_back(i); subsets.push_back(s); }
+        while (std::next_permutation(sel.begin(), sel.end()));
+    } else {
+        std::vector<int> all(n); std::iota(all.begin(), all.end(), 0);
+        for (int t = 0; t < max_subsets; ++t) {
+            std::shuffle(all.begin(), all.end(), rng);
+            std::vector<int> s(all.begin(), all.begin() + k); std::sort(s.begin(), s.end()); subsets.push_back(s);
+        }
+    }
+    int bad = 0;
+    std::vector<std::vector<uint8_t>> scratch(k, std::vector<uint8_t>(len));
+    for (auto& s : subsets) {
+        uint8_t* ptr[256]; int idx[256], oidx[256];
+        for (int i = 0; i < k; ++i) {
+            idx[i] = s[i];
+            if (s[i] < k) ptr[i] = data[s[i]].data();
+            else { std::memcpy(scratch[i].data(), &par[static_cast<size_t>(s[i] - k) * len], len); ptr[i] = scratch[i].data(); }
+        }
+        if (cc.decode(ptr, idx, oidx)) { ++bad; continue; }
+        for (int i = 0; i < k; ++i)
+            if (idx[i] >= k && (oidx[i] >= k || std::memcmp(ptr[i], data[oidx[i]].data(), len))) { ++bad; break; }
+    }
+    CHECK(bad == 0, "cm256 decode RS(%d,%d) len=%d: %d failures over %zu subsets", n, k, len, bad, subsets.size());
+}
+
 int main() {
     GF256::init();
     std::printf("ISAs available:");
@@ -218,6 +260,12 @@ int main() {
     test_decoders(16, 8, 4097, 100000);    // all 12870
     test_decoders(32, 16, 9216, 3000);     // random
     test_decoders(48, 32, 1000, 2000);
+    test_cm256(5, 4, 1500, 100000);        // m=1: cm256 XOR path
+    test_cm256(8, 4, 4096, 100000);
+    test_cm256(16, 8, 4097, 100000);
+    test_cm256(18, 16, 4096, 100000);
+    test_cm256(32, 16, 9216, 3000);
+    test_cm256(36, 32, 1000, 3000);
     std::printf("%d passed, %d failed\n", g_pass, g_fail);
     return g_fail ? 1 : 0;
 }

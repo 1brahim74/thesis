@@ -9,7 +9,7 @@ make test              # 7k+ correctness checks; must pass
 QUICK=1 ./run_all.sh   # 2-min pipeline check
 ```
 
-Requirements: GCC ≥ 9 on x86-64 Linux, `libisal-dev` (or `make isal` to build ISA-L from source; needs nasm/autotools), and Python 3 with pandas and matplotlib.
+Requirements: GCC ≥ 9 on x86-64 Linux with AVX2, git (the Makefile fetches cm256), `libisal-dev` (or `make isal` to build ISA-L from source; needs nasm/autotools), and Python 3 with pandas and matplotlib.
 
 ## What is compared
 
@@ -19,6 +19,7 @@ Requirements: GCC ≥ 9 on x86-64 Linux, `libisal-dev` (or `make isal` to build 
 | `isal_<k>` | **k×k**, `gf_invert_matrix`, exactly as in ISA-L's `ec_simple_example.c` | ISA-L asm |
 | `hybrid_<k>` | **m×m** (thesis algorithm) | ISA-L asm |
 | `ours_<isa>` | **m×m** (thesis algorithm) | `gf256_simd.hpp` split-nibble `vpshufb` |
+| `cm256` | **N×N, N = lost** (open-source erasure-count decoder, O(N²) LDU), catid/cm256 pinned at `634d1e3` | cm256's gf256 AVX2 |
 
 `<k>` is the kernel: `avx2` or `avx512` pins both libraries to the same ISA, and `default` is ISA-L's own dispatcher, which picks GFNI on CPUs that have it.
 
@@ -65,7 +66,8 @@ These are from a 2-vCPU cloud VM (Xeon, AVX-512, no GFNI), quick mode, and are i
    - The gap grows with k, and low-overhead network codes (small m, large k) are the regime that matters.
 2. **Against ISA-L with a cached decode matrix, the advantage disappears.** This work is within about 0.7–1.1× of cached ISA-L, and the cached baseline wins at tiny packets. The honest claim: m×m inversion makes a *cache miss* cost about the same as a cache hit, which matters when loss patterns rarely repeat. RS(36,32) with m′ ≤ 4 has over 40,000 lost-data patterns.
 3. **The SIMD kernel matches ISA-L's AVX2/AVX-512 assembly to within about 1.0–1.5×, but does not beat it.** For the paper, the strongest configuration is `hybrid` (m×m inversion on ISA-L's kernel). It shows the contribution is portable.
-4. **The encoder, not the decoder, sets the core count for line rate.** It runs on every codeword, and its cost is m·k·L regardless of loss.
+4. **cm256 (open-source erasure-count decoder) is the baseline that matters.** It wins when one packet is lost (0.4–0.9×), because its first parity row is all-ones, so it recovers with plain XOR and no multiplications. It also wins at small packets, where its fixed cost is lower. With m′ ≥ 2 this work is 1.1–1.5× faster than cm256 at 4 KB (AVX-512 VM). cm256 is measured on its own parity for the same data and loss patterns, total time only (it exposes no matrix/region split), and it decodes in place, so its parity is copied to scratch outside the timed region.
+5. **The encoder, not the decoder, sets the core count for line rate.** It runs on every codeword, and its cost is m·k·L regardless of loss.
 
 ## Correction for the thesis text
 

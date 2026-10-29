@@ -22,10 +22,11 @@ FIG = os.path.join(D, "figures")
 os.makedirs(FIG, exist_ok=True)
 
 # Reference categorical palette (fixed order) + recessive ink.
-C = {"isal": "#eb6834", "ours": "#2a78d6", "hybrid": "#1baf7a", "v3": "#52514e"}
+C = {"isal": "#eb6834", "ours": "#2a78d6", "hybrid": "#1baf7a", "cm256": "#eda100", "v3": "#52514e"}
 INK, INK2, GRID, SURF = "#0b0b0b", "#52514e", "#e4e3df", "#fcfcfb"
 LABEL = {"isal": "ISA-L (k×k inverse)", "ours": "this work (m×m inverse + SIMD)",
-         "hybrid": "m×m inverse + ISA-L kernel", "v3": "v3 thesis codec (scalar)"}
+         "hybrid": "m×m inverse + ISA-L kernel", "cm256": "cm256 (erasure-count, LDU)",
+         "v3": "v3 thesis codec (scalar)"}
 
 plt.rcParams.update({
     "figure.facecolor": SURF, "axes.facecolor": SURF, "savefig.facecolor": SURF,
@@ -123,6 +124,21 @@ if lat is not None:
             summary.append(f"| RS({n},{k}) | {ml} | {it:.2f} | {ir:.2f} | {ht:.2f} | {it / ht:.1f}× | {ir / ht:.2f}× |")
         summary.append("")
 
+    # cm256: the open-source erasure-count decoder (O(N²) LDU), the baseline that matters most.
+    if "cm256" in set(t4.method):
+        ob = f"ours_{sfx}"
+        summary += ["## vs cm256 (open-source erasure-count decoder), 4 KB, median µs", "",
+                    f"| code | m' | cm256 | m×m + ISA-L kernel | this work ({sfx}) | best of ours vs cm256 |",
+                    "|---|---|---|---|---|---|"]
+        for (n, k, ml), g in t4.groupby(["n", "k", "m_lost"]):
+            get = lambda me: g[g.method == me].total_med_ns.iloc[0] / 1e3 if (g.method == me).any() else float("nan")
+            c, h, o = get("cm256"), get("hybrid_default"), get(ob)
+            best = min(x for x in (h, o) if x == x)
+            summary.append(f"| RS({n},{k}) | {ml} | {c:.2f} | {h:.2f} | {o:.2f} | {c / best:.2f}× |")
+        summary += ["", "cm256's first recovery row is all-ones (plain XOR), so a single loss recovered from it "
+                    "needs no multiplications; compare m'≥2 for the decoder itself. cm256 gets its own parity "
+                    "for the same data and loss patterns.", ""]
+
     # ── fig 3: m' sweep ────────────────────────────────────────────────────
     big = dec[(dec.pkt == 4096)]
     cands = [c for c in [(32, 16), (36, 32), (20, 16)] if ((big.n == c[0]) & (big.k == c[1])).any()]
@@ -133,6 +149,9 @@ if lat is not None:
             for me in (f"isal_{sfx}", f"hybrid_{sfx}", f"ours_{sfx}"):
                 s = g[g.method == me].sort_values("m_lost")
                 ax.plot(s.m_lost, s.total_med_ns / 1e3, marker="o", ms=5, color=C[family(me)], label=LABEL[family(me)])
+            s = g[g.method == "cm256"].sort_values("m_lost")
+            if not s.empty:
+                ax.plot(s.m_lost, s.total_med_ns / 1e3, marker="s", ms=5, color=C["cm256"], label=LABEL["cm256"])
             s = g[g.method == f"isal_{sfx}"].sort_values("m_lost")
             ax.plot(s.m_lost, s.region_med_ns / 1e3, ls=":", color=C["isal"], label="ISA-L, decode matrix cached")
             ax.set_title(f"RS({n},{k}), 4 KB")
@@ -163,6 +182,12 @@ if sweep is not None:
             spc = j.region_med_ns_i / j.total_med_ns_o
             ax.plot(j.index, sp, ls=ls, marker="o", ms=4, color=C["ours"], label=f"vs ISA-L, m'={ml}")
             ax.plot(j.index, spc, ls=ls, marker="o", ms=4, color=C["isal"], alpha=0.9, label=f"vs cached ISA-L, m'={ml}")
+            cmr = g[(g.method == "cm256") & (g.m_lost == ml)].set_index("pkt")
+            if not cmr.empty:
+                jc = o.join(cmr, lsuffix="_o", rsuffix="_c", how="inner")
+                spm = jc.total_med_ns_c / jc.total_med_ns_o
+                ax.plot(jc.index, spm, ls=ls, marker="s", ms=4, color=C["cm256"], label=f"vs cm256, m'={ml}")
+                summary.append(f"- RS({n},{k}) m'={ml}: vs cm256 {spm.min():.2f}–{spm.max():.2f}×")
             below = [p for p, v in spc.items() if v < 1]
             summary.append(f"- RS({n},{k}) m'={ml}: speedup vs ISA-L {sp.min():.1f}–{sp.max():.1f}×; "
                            f"vs cached ISA-L {spc.min():.2f}–{spc.max():.2f}×"
@@ -176,7 +201,7 @@ if sweep is not None:
             lambda v, _: f"{int(v // 1024)}K" if v >= 1024 else str(int(v))))
     axes[0][0].set_ylabel("speedup of this work (×, log)")
     axes[0][0].legend(fontsize=7)
-    fig.suptitle("Decode speedup over ISA-L vs packet size (>1 = this work faster)", color=INK, fontsize=10)
+    fig.suptitle("Decode speedup of this work vs packet size (>1 = this work faster)", color=INK, fontsize=10)
     fig.tight_layout()
     fig.savefig(os.path.join(FIG, "fig2_crossover.png"), dpi=200)
     plt.close(fig)
@@ -203,11 +228,12 @@ if tput is not None:
                            f"{s.gbps.iloc[-1]:.1f} @ {s.threads.iloc[-1]} | {need(100)} | {need(400)} |")
             if op == "decode" and ml != mlmax:
                 continue
-            if tsfx and not me.endswith("_" + tsfx):
-                continue   # plot only the matched-ISA pair; the table keeps every kernel
+            if tsfx and me != "cm256" and not me.endswith("_" + tsfx):
+                continue   # plot only the matched-ISA pair (+cm256); the table keeps every kernel
+            name = {"isal": "ISA-L", "cm256": "cm256"}.get(family(me), "this work")
             ax.plot(s.threads, s.gbps, marker="o", ms=5, color=C[family(me)],
                     ls="-" if op == "decode" else "--",
-                    label=f"{'ISA-L' if family(me) == 'isal' else 'this work'} {op}" + (f" (m'={ml})" if op == "decode" else ""))
+                    label=f"{name} {op}" + (f" (m'={ml})" if op == "decode" else ""))
         for lr in (100, 400):
             ax.axhline(lr, color=INK2, lw=1, ls=":")
             ax.text(ax.get_xlim()[0], lr, f" {lr} Gbps", va="bottom", fontsize=7, color=INK2)
