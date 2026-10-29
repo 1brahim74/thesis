@@ -1,0 +1,6 @@
+test_simd
+bench_isal
+isal-src/
+isal-install/
+results/
+__pycache__/
