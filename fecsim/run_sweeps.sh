@@ -62,6 +62,22 @@ for rto in 100 1000; do
   add --protos fec --codes $CODES --decode hybrid_default --sizes 128K,2M --rtts 5 --loss $LOSS --rto $rto --trials $TR --out $OUT/parts/d_fec_${rto}.csv
 done
 
+# E: bursts calibrated to Meta's measurements (Ghabashneh et al., IMC 2022): lossy bursts of mean
+#    2.9 ms (median 2 ms, p90 8 ms), occupying a fraction PI of time: typical 2.2e-4 (7.5 bursts/s, 1% lossy),
+#    busy 1.15e-3 (39.8 bursts/s, 1% lossy), contended 5.8e-3 (39.8 bursts/s, 5% lossy). Loss inside a burst
+#    is not published, so it is swept (PB). Rates are per packet at 100 Gbps / 4 KB (3.05 Mpps).
+BG=$(python3 -c "print(1/(2.885e-3*100e9/(4096*8)))")
+for pi in 2.2e-4 1.15e-3 5.8e-3; do
+  GB=$(python3 -c "pi=$pi; bg=$BG; print(pi*bg/(1-pi))")
+  for pb in 0.01 0.1 0.3; do
+    tag=${pi}_${pb}
+    add --protos gbn,sr,srtlp --sizes 128K,512K --rtts 5 --ge $GB,$BG,0,$pb --flows 64 --trials $TRC --out $OUT/parts/e_rt_${tag}.csv
+    for d in $DECODES; do
+      add --protos fec --codes $CODES --decode $d --sizes 128K,512K --rtts 5 --ge $GB,$BG,0,$pb --flows 64 --trials $TRC --out $OUT/parts/e_fec_${d}_${tag}.csv
+    done
+  done
+done
+
 echo ">> $(wc -l < "$jobs_file") jobs on $JOBS cores"
 xargs -P "$JOBS" -I{} sh -c '{} 2>>'"$OUT"'/errors.log' < "$jobs_file"
 [ -s "$OUT/errors.log" ] && { echo "errors:"; cat "$OUT/errors.log"; exit 1; }
@@ -69,10 +85,19 @@ xargs -P "$JOBS" -I{} sh -c '{} 2>>'"$OUT"'/errors.log' < "$jobs_file"
 python3 - "$OUT" <<'EOF'
 import glob, os, sys, pandas as pd
 d = sys.argv[1]
-for prefix, name in (("a", "bernoulli"), ("b", "dc3"), ("c", "collective"), ("d", "rto")):
+import re
+for prefix, name in (("a", "bernoulli"), ("b", "dc3"), ("c", "collective"), ("d", "rto"), ("e", "measured")):
     fs = sorted(glob.glob(f"{d}/parts/{prefix}_*.csv"))
-    if fs:
-        pd.concat([pd.read_csv(f) for f in fs]).to_csv(f"{d}/{name}.csv", index=False)
+    if not fs:
+        continue
+    parts = []
+    for f in fs:
+        x = pd.read_csv(f)
+        m = re.search(r"_([0-9.e-]+)_([0-9.]+)\.csv$", f) if prefix == "e" else None
+        if m:
+            x["burst_time_frac"] = float(m.group(1)); x["burst_loss"] = float(m.group(2))
+        parts.append(x)
+    pd.concat(parts).to_csv(f"{d}/{name}.csv", index=False)
 EOF
 python3 plot_sim.py "$OUT"
 echo ">> done: $OUT"

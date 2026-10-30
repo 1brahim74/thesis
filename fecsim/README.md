@@ -13,7 +13,8 @@ Timing model:
 - link rate B, MTU L, one-way delay RTT/2, serialization L·8/B per packet;
 - the sender transmits back-to-back at line rate with no window limit;
 - ACKs and NAKs are never lost;
-- losses come from a per-transmission channel model: Bernoulli, Gilbert–Elliott, or DC3 from `FEC_Codec_v3/channel.hpp`.
+- losses come from a channel model: Bernoulli, a two-state burst model (`--ge`), or DC3 from `FEC_Codec_v3/channel.hpp`;
+- the burst models advance in wall-clock time (one step per packet-time, including while the sender is idle waiting for a timeout), and each message starts in a state drawn from the model's long-run distribution.
 
 Every protocol sees the same random loss draws (common random numbers).
 
@@ -62,6 +63,20 @@ These come from a quick-mode run (400 trials per point, 100 for 64-flow steps). 
    - With free decode it would take 13.6 µs, so erasure-count decoding gets within 7% of the bound.
 3. **cm256 and m×m + ISA-L give almost the same network-level results.** Once decode costs about 1 µs, it stops mattering compared with RTT and serialization. The gap that matters is k×k versus erasure-count decoding, not which erasure-count implementation is used.
 4. **Longer RTTs favour FEC.** At RTT 25 µs FEC wins up to 2 MB at 10⁻³ loss and above. At RTT 2 µs it wins only at 128 KB and 1% loss.
+
+## Bursts calibrated to measurements (`measured.csv`, `fig7`)
+
+Ghabashneh et al. (IMC 2022) measured Meta racks: bursts last a median 2 ms (p90 8 ms), occur 7.5 times per second (p90 39.8), and 0.4–1% of bursts are lossy (4–6% for large contended bursts). Converted to a two-state burst model at 100 Gbps / 4 KB (3.05 M packets/s):
+- mean lossy-burst length 2.9 ms (about 8,800 packets);
+- fraction of time in a lossy burst: typical 2.2·10⁻⁴, busy 1.15·10⁻³, contended 5.8·10⁻³;
+- loss inside a burst is not published, so it is swept over 1%, 10% and 30%.
+
+On a 64-flow step of 128 KB, with 10% loss inside a busy-rack burst:
+- best retransmission: 25.0 µs;
+- FEC with ISA-L decode: 32.3 µs, so it loses;
+- FEC with erasure-count decode: 17.1 µs, so it wins.
+
+At 30% loss inside a burst, every scheme degrades, because no code here carries enough parity. Bursts are independent across flows. In a real incast, flows to the same receiver share a burst.
 
 ## Assumptions and limitations (state these in any write-up)
 

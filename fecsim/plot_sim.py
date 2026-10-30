@@ -223,6 +223,88 @@ if rto is not None:
     ax.set_title(f"{size_label(s)}, RTT 5 µs: timeout sensitivity"); ax.legend(fontsize=7)
     fig.tight_layout(); fig.savefig(os.path.join(FIG, "fig5_rto.png"), dpi=170); plt.close(fig)
 
+# ── fig 6: tail latency vs bandwidth overhead ───────────────────────────────
+def overhead_panel(ax, df, size, rtt, title):
+    sub = df[(df.rtt_us == rtt) & (df.msg_bytes == size) & (df.rto_us == 100)]
+    losses = [l for l in (1e-4, 1e-3, 1e-2) if l in set(sub.loss_param)]
+    lc = {1e-4: "#1baf7a", 1e-3: "#2a78d6", 1e-2: "#6250d6"}
+    rows = []
+    for l in losses:
+        f = sub[(sub.proto == "fec") & (sub.decode == "hybrid_default") & (sub.loss_param == l)].copy()
+        f["k"] = f.code.str.split(":").str[1].astype(int)
+        for k, mk in ((16, "o"), (32, "s")):
+            g = f[f.k == k].sort_values("overhead")
+            ax.plot(g.overhead * 100, g.p99_us, marker=mk, ms=5, color=lc[l], ls="-" if k == 16 else "--",
+                    label=f"FEC k={k}, loss {l:g}")
+        rt = sub[sub.proto.isin(["sr", "srtlp"]) & (sub.loss_param == l)].p99_us.min()
+        ax.axhline(rt, color=lc[l], lw=1, ls=":")
+        ax.text(4.3, rt, f"best retransmission, loss {l:g}", fontsize=6.5, color=lc[l], va="bottom")
+        for _, r in f.iterrows():
+            rows.append((l, r.code, r.overhead * 100, r.p99_us, rt))
+    ax.set_xlabel("parity bandwidth overhead (%)"); ax.set_ylabel("p99 completion (µs)")
+    ax.set_yscale("log"); ax.set_xticks([6.25, 12.5, 25]); ax.set_xticklabels(["6.25", "12.5", "25"])
+    ax.set_xlim(4, 34); ax.set_title(title)
+    return rows
+
+if bern is not None or coll is not None:
+    panels = []
+    if coll is not None:
+        r0 = 5 if 5 in coll.rtt_us.unique() else sorted(coll.rtt_us.unique())[0]
+        for s in sorted(coll.msg_bytes.unique()):
+            panels.append((coll, s, r0, f"slowest of {int(coll.flows.iloc[0])} flows, {size_label(s)} each, RTT {r0:g} µs"))
+    if bern is not None:
+        r0 = 5 if 5 in bern.rtt_us.unique() else sorted(bern.rtt_us.unique())[0]
+        if 2097152 in set(bern.msg_bytes):
+            panels.append((bern, 2097152, r0, f"single 2 MB message, RTT {r0:g} µs"))
+    fig, axes = plt.subplots(1, len(panels), figsize=(4.6 * len(panels), 3.6), squeeze=False)
+    summary += ["## Tail latency vs parity overhead (m×m + ISA-L decode, RTO 100 µs)", "",
+                "| setting | loss | code | overhead | FEC p99 (µs) | best retransmission p99 (µs) |", "|---|---|---|---|---|---|"]
+    for ax, (df, s, r0, title) in zip(axes[0], panels):
+        for (l, code, ov, p99, rt) in overhead_panel(ax, df, s, r0, title):
+            summary.append(f"| {title} | {l:g} | {code} | {ov:.2f}% | {p99:.1f} | {rt:.1f} |")
+    h, l = axes[0][0].get_legend_handles_labels()
+    fig.legend(h, l, loc="lower center", ncol=6, fontsize=7, bbox_to_anchor=(0.5, -0.02))
+    fig.suptitle("Dotted: best of SR and SR+TLP at the same loss rate. FEC uses m×m + ISA-L decode.", fontsize=8, color=INK2, y=1.0)
+    fig.tight_layout(rect=(0, 0.07, 1, 0.97)); fig.savefig(os.path.join(FIG, "fig6_overhead.png"), dpi=170, bbox_inches="tight"); plt.close(fig)
+    summary.append("")
+
+# ── fig 7: bursts calibrated to Meta measurements ───────────────────────────
+meas = load("measured.csv")
+if meas is not None:
+    SC = {2.2e-4: "typical rack", 1.15e-3: "busy rack", 5.8e-3: "contended rack"}
+    SHORT = {2.2e-4: "typical", 1.15e-3: "busy", 5.8e-3: "contended"}
+    sizes = sorted(meas.msg_bytes.unique())
+    fig, axes = plt.subplots(1, len(sizes), figsize=(6.2 * len(sizes), 3.8), squeeze=False)
+    summary += ["## Bursty loss calibrated to Meta measurements (64-flow step, RTT 5 µs, p99 µs)", "",
+                "Lossy bursts of mean 2.9 ms occupying a fraction of time per rack type (Ghabashneh et al., IMC 2022); "
+                "loss inside a burst is swept because it is not published.", "",
+                "| size | rack | loss in burst | best retransmission | " + " | ".join(DLABEL[x] for x in DECODES) + " |",
+                "|---|---|---|---|" + "---|" * len(DECODES)]
+    for ax, s in zip(axes[0], sizes):
+        sub = meas[meas.msg_bytes == s]
+        keys = sorted(set(zip(sub.burst_time_frac, sub.burst_loss)))
+        series = {"best retransmission": [], **{DLABEL[x]: [] for x in DECODES}}
+        labels = []
+        for pi, pb in keys:
+            g = sub[(sub.burst_time_frac == pi) & (sub.burst_loss == pb)]
+            rt = g[g.proto.isin(["sr", "srtlp"])].p99_us.min()
+            vals = [g[(g.proto == "fec") & (g.decode == x)].p99_us.min() for x in DECODES]
+            series["best retransmission"].append(rt)
+            for x, v in zip(DECODES, vals): series[DLABEL[x]].append(v)
+            labels.append(f"{SHORT.get(pi, pi)}\n{pb:.0%} loss")
+            summary.append(f"| {size_label(s)} | {SC.get(pi, pi)} | {pb:g} | {rt:.1f} | " + " | ".join(f"{v:.1f}" for v in vals) + " |")
+        xs = np.arange(len(keys)); w = 0.8 / len(series)
+        cols = [C["srtlp"]] + [C[x] for x in DECODES]
+        for i, (name, v) in enumerate(series.items()):
+            ax.bar(xs + (i - (len(series) - 1) / 2) * w, v, w * 0.92, color=cols[i], label=name)
+        ax.set_yscale("log"); ax.set_xticks(xs); ax.set_xticklabels(labels, fontsize=7, rotation=0)
+        ax.set_xlabel("rack burstiness (Meta IMC'22) and loss rate inside a burst")
+        ax.set_ylabel("p99 step completion (µs)"); ax.set_title(f"slowest of 64 flows, {size_label(s)} each, RTT 5 µs")
+        ax.grid(axis="x", visible=False)
+    axes[0][0].legend(fontsize=7)
+    fig.tight_layout(); fig.savefig(os.path.join(FIG, "fig7_measured_bursts.png"), dpi=170); plt.close(fig)
+    summary.append("")
+
 with open(os.path.join(D, "summary.md"), "w") as f:
     f.write("\n".join(summary) + "\n")
 print("\n".join(summary))

@@ -67,3 +67,53 @@ Cells (loss × size) where p99(FEC) < p99(best retransmission), out of all cells
 
 Burst frequency → mean loss rate: 1e-05 → 0.001, 0.0001 → 0.0011, 0.001 → 0.0017, 0.01 → 0.0078
 
+## Tail latency vs parity overhead (m×m + ISA-L decode, RTO 100 µs)
+
+| setting | loss | code | overhead | FEC p99 (µs) | best retransmission p99 (µs) |
+|---|---|---|---|---|---|
+| slowest of 64 flows, 128 KB each, RTT 5 µs | 0.0001 | 17:16 | 6.25% | 14.3 | 18.3 |
+| slowest of 64 flows, 128 KB each, RTT 5 µs | 0.0001 | 18:16 | 12.50% | 14.6 | 18.3 |
+| slowest of 64 flows, 128 KB each, RTT 5 µs | 0.0001 | 20:16 | 25.00% | 15.3 | 18.3 |
+| slowest of 64 flows, 128 KB each, RTT 5 µs | 0.0001 | 34:32 | 6.25% | 14.7 | 18.3 |
+| slowest of 64 flows, 128 KB each, RTT 5 µs | 0.0001 | 36:32 | 12.50% | 14.7 | 18.3 |
+| slowest of 64 flows, 128 KB each, RTT 5 µs | 0.001 | 17:16 | 6.25% | 14.3 | 23.3 |
+| slowest of 64 flows, 128 KB each, RTT 5 µs | 0.001 | 18:16 | 12.50% | 14.6 | 23.3 |
+| slowest of 64 flows, 128 KB each, RTT 5 µs | 0.001 | 20:16 | 25.00% | 15.3 | 23.3 |
+| slowest of 64 flows, 128 KB each, RTT 5 µs | 0.001 | 34:32 | 6.25% | 15.6 | 23.3 |
+| slowest of 64 flows, 128 KB each, RTT 5 µs | 0.001 | 36:32 | 12.50% | 15.5 | 23.3 |
+| slowest of 64 flows, 128 KB each, RTT 5 µs | 0.01 | 17:16 | 6.25% | 118.6 | 118.3 |
+| slowest of 64 flows, 128 KB each, RTT 5 µs | 0.01 | 18:16 | 12.50% | 20.3 | 118.3 |
+| slowest of 64 flows, 128 KB each, RTT 5 µs | 0.01 | 20:16 | 25.00% | 16.8 | 118.3 |
+| slowest of 64 flows, 128 KB each, RTT 5 µs | 0.01 | 34:32 | 6.25% | 119.0 | 118.3 |
+| slowest of 64 flows, 128 KB each, RTT 5 µs | 0.01 | 36:32 | 12.50% | 18.5 | 118.3 |
+| slowest of 64 flows, 512 KB each, RTT 5 µs | 0.0001 | 17:16 | 6.25% | 47.7 | 49.8 |
+| slowest of 64 flows, 512 KB each, RTT 5 µs | 0.0001 | 18:16 | 12.50% | 50.0 | 49.8 |
+| slowest of 64 flows, 512 KB each, RTT 5 µs | 0.0001 | 20:16 | 25.00% | 54.6 | 49.8 |
+| slowest of 64 flows, 512 KB each, RTT 5 µs | 0.0001 | 34:32 | 6.25% | 48.1 | 49.8 |
+| slowest of 64 flows, 512 KB each, RTT 5 µs | 0.0001 | 36:32 | 12.50% | 50.1 | 49.8 |
+| slowest of 64 flows, 512 KB each, RTT 5 µs | 0.001 | 17:16 | 6.25% | 47.7 | 55.1 |
+| slowest of 64 flows, 512 KB each, RTT 5 µs | 0.001 | 18:16 | 12.50% | 50.0 | 55.1 |
+| slowest of 64 flows, 512 KB each, RTT 5 µs | 0.001 | 20:16 | 25.00% | 54.6 | 55.1 |
+| slowest of 64 flows, 512 KB each, RTT 5 µs | 0.001 | 34:32 | 6.25% | 49.0 | 55.1 |
+| slowest of 64 flows, 512 KB each, RTT 5 µs | 0.001 | 36:32 | 12.50% | 50.9 | 55.1 |
+| slowest of 64 flows, 512 KB each, RTT 5 µs | 0.01 | 17:16 | 6.25% | 152.4 | 160.8 |
+| slowest of 64 flows, 512 KB each, RTT 5 µs | 0.01 | 18:16 | 12.50% | 55.7 | 160.8 |
+| slowest of 64 flows, 512 KB each, RTT 5 µs | 0.01 | 20:16 | 25.00% | 56.1 | 160.8 |
+| slowest of 64 flows, 512 KB each, RTT 5 µs | 0.01 | 34:32 | 6.25% | 152.4 | 160.8 |
+| slowest of 64 flows, 512 KB each, RTT 5 µs | 0.01 | 36:32 | 12.50% | 53.8 | 160.8 |
+| single 2 MB message, RTT 5 µs | 0.0001 | 17:16 | 6.25% | 180.4 | 170.6 |
+| single 2 MB message, RTT 5 µs | 0.0001 | 18:16 | 12.50% | 190.6 | 170.6 |
+| single 2 MB message, RTT 5 µs | 0.0001 | 20:16 | 25.00% | 210.9 | 170.6 |
+| single 2 MB message, RTT 5 µs | 0.0001 | 34:32 | 6.25% | 180.1 | 170.6 |
+| single 2 MB message, RTT 5 µs | 0.0001 | 36:32 | 12.50% | 189.9 | 170.6 |
+| single 2 MB message, RTT 5 µs | 0.001 | 17:16 | 6.25% | 181.4 | 173.3 |
+| single 2 MB message, RTT 5 µs | 0.001 | 18:16 | 12.50% | 191.6 | 173.3 |
+| single 2 MB message, RTT 5 µs | 0.001 | 20:16 | 25.00% | 211.9 | 173.3 |
+| single 2 MB message, RTT 5 µs | 0.001 | 34:32 | 6.25% | 181.8 | 173.3 |
+| single 2 MB message, RTT 5 µs | 0.001 | 36:32 | 12.50% | 191.6 | 173.3 |
+| single 2 MB message, RTT 5 µs | 0.01 | 17:16 | 6.25% | 186.4 | 183.2 |
+| single 2 MB message, RTT 5 µs | 0.01 | 18:16 | 12.50% | 192.2 | 183.2 |
+| single 2 MB message, RTT 5 µs | 0.01 | 20:16 | 25.00% | 212.2 | 183.2 |
+| single 2 MB message, RTT 5 µs | 0.01 | 34:32 | 6.25% | 182.8 | 183.2 |
+| single 2 MB message, RTT 5 µs | 0.01 | 36:32 | 12.50% | 192.4 | 183.2 |
+

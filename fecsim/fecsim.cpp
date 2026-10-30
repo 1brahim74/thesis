@@ -58,7 +58,16 @@ struct Channel {
     std::mt19937_64 rng;
     std::uniform_real_distribution<double> U{0.0, 1.0};
 
-    void reset(uint64_t seed) { rng.seed(seed); state = 0; txi = 0; }
+    // Start each message in a state drawn from the chain's stationary distribution, so long
+    // bursts (thousands of packets) are represented correctly without a long warm-up.
+    void reset(uint64_t seed) {
+        rng.seed(seed); state = 0; txi = 0;
+        if (kind == "ge") state = U(rng) < ge_gb / (ge_gb + ge_bg) ? 1 : 0;
+        if (kind == "dc3") {
+            double r = nd / dn, s3 = nd * di / (dn * id), sum = 1 + r + s3, u = U(rng) * sum;
+            state = u < 1 ? 0 : u < 1 + r ? 1 : 2;
+        }
+    }
 
     bool lose() {
         if (kind == "bernoulli") return U(rng) < p;
@@ -78,6 +87,27 @@ struct Channel {
         else if (state == 1) { if (u < dn) state = 0; else if (u < dn + di) state = 2; }
         else { if (u < id) state = 1; }
         return l;
+    }
+
+    // Advance the chain by n packet-times without transmitting (sender idle, e.g. waiting for a
+    // timeout), so bursts evolve in wall-clock time rather than only when this flow sends.
+    void advance(long n) {
+        if (n <= 0 || kind == "bernoulli" || kind == "forced") return;
+        if (kind == "ge") {
+            double pi_b = ge_gb / (ge_gb + ge_bg), lam = 1.0 - ge_gb - ge_bg;
+            double pb = pi_b + ((state == 1 ? 1.0 : 0.0) - pi_b) * std::pow(lam, (double)n);
+            state = U(rng) < pb ? 1 : 0;
+            return;
+        }
+        // dc3: step explicitly for short gaps, otherwise draw from the stationary distribution
+        if (n > 200000) { double r = nd / dn, s3 = nd * di / (dn * id), sum = 1 + r + s3, u = U(rng) * sum;
+                          state = u < 1 ? 0 : u < 1 + r ? 1 : 2; return; }
+        for (long i = 0; i < n; ++i) {
+            double u = U(rng);
+            if (state == 0) { if (u < nd) state = 1; }
+            else if (state == 1) { if (u < dn) state = 0; else if (u < dn + di) state = 2; }
+            else { if (u < id) state = 1; }
+        }
     }
 
     double mean_loss() const {
@@ -166,6 +196,7 @@ struct Sim {
     int nunits = 0;
     double last_progress = 0; uint64_t rto_gen = 0;
     long tx_count = 0;
+    double last_tx_end = 0;
 
     // FEC bookkeeping
     int G = 0;
@@ -205,6 +236,8 @@ struct Sim {
         int u = next_unit();
         if (u < 0) { sender_busy = false; return; }
         ++tx_count; sent_once[u] = 1;
+        ch.advance((long)std::floor((now - last_tx_end) / P.t_pkt() + 1e-9));   // idle time since last send
+        last_tx_end = now + P.t_pkt();
         if (P.proto == "srtlp" && !tlp_armed && fresh.empty() && retx.empty()) {
             tlp_armed = true;                       // last new packet: arm one probe
             push(now + P.t_pkt() + (P.pto >= 0 ? P.pto : 2 * P.rtt), TLP_FIRE);
@@ -395,6 +428,8 @@ static void usage() {
         "  --loss 1e-5,1e-4,1e-3        bernoulli loss rates\n"
         "  --dc3-nd 0.0001,0.001        dc3 NORMAL->DEGRADED rates (burst frequency); other dc3/ge params via --dc3/--ge\n"
         "  --dc3 dn,di,id,pn,pd,pi      override dc3 parameters (defaults 0.2,0.1,0.3,0.001,0.03,0.35)\n"
+        "  --ge gb,bg,pg,pb             two-state burst channel per transmitted packet: P(good->bad), P(bad->good),\n"
+        "                               loss in good, loss in bad. Messages start in the stationary state.\n"
         "  --flows 1                    parallel flows; completion = slowest (collective step)\n"
         "  --trials 2000 --seed 1 --out results.csv");
 }
@@ -404,7 +439,7 @@ int main(int argc, char** argv) {
     std::vector<std::string> sizes = {"64K", "1M"};
     std::vector<double> rtts = {5}, losses = {1e-4}, nds = {0.001};
     std::vector<std::pair<int, int>> codes = {{18, 16}};
-    std::string chan = "bernoulli", table = "", out = "", dc3 = "", forced = "";
+    std::string chan = "bernoulli", table = "", out = "", dc3 = "", forced = "", ge = "";
     std::string decode = "hybrid_default";
     int mtu = 4096, cores = 1, flows = 1, trials = 2000; double gbps = 100, rto = 100, pto = -1; uint64_t seed = 1;
     for (int i = 1; i < argc; ++i) {
@@ -428,6 +463,7 @@ int main(int argc, char** argv) {
         else if (a == "--loss") losses = dl(v);
         else if (a == "--dc3-nd") nds = dl(v);
         else if (a == "--dc3") dc3 = v;
+        else if (a == "--ge") { ge = v; chan = "ge"; }
         else if (a == "--force") { forced = v; chan = "forced"; }
         else if (a == "--flows") flows = std::stoi(v);
         else if (a == "--trials") trials = std::stoi(v);
@@ -459,6 +495,10 @@ int main(int argc, char** argv) {
                 Channel ch; ch.kind = chan;
                 if (chan == "forced") for (auto& x : split(forced, ',')) ch.forced.push_back(std::stol(x));
                 if (chan == "bernoulli") ch.p = lp;
+                if (chan == "ge" && !ge.empty()) {
+                    auto v = split(ge, ',');   // gb,bg,pg,pb per transmitted packet
+                    ch.ge_gb = std::stod(v[0]); ch.ge_bg = std::stod(v[1]); ch.ge_pg = std::stod(v[2]); ch.ge_pb = std::stod(v[3]);
+                }
                 if (chan == "dc3") {
                     ch.nd = lp;
                     if (!dc3.empty()) { auto v = split(dc3, ','); ch.dn = std::stod(v[0]); ch.di = std::stod(v[1]); ch.id = std::stod(v[2]); ch.pn = std::stod(v[3]); ch.pd = std::stod(v[4]); ch.pi = std::stod(v[5]); }
@@ -471,7 +511,7 @@ int main(int argc, char** argv) {
                         // Same seed per (trial, flow) across protocols → common random numbers.
                         ch.reset(seed * 1000003ULL + (uint64_t)t * 7919ULL + (uint64_t)f * 104729ULL);
                         // Warm the Markov chain to stationarity so a message starts in a random state.
-                        if (chan == "ge" || chan == "dc3") for (int w = 0; w < 2000; ++w) ch.lose();
+                        // (ge/dc3 start from the stationary distribution; see Channel::reset)
                         Sim s(P, ch, dcost);
                         worst = std::max(worst, s.run());
                         tx += s.tx_count;
