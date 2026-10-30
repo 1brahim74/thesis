@@ -59,7 +59,7 @@ echo "pinned latency core: $PIN; throughput cores: $CPUS" | tee -a "$OUT/machine
 if [ "$QUICK" = 1 ]; then ITERS=300; WARM=50; SECS=0.5; else ITERS=10000; WARM=1000; SECS=3; fi
 
 # Network-relevant codes: low overhead (18:16, 36:32) plus the thesis configs.
-CONFIGS=5:4,8:4,16:8,18:16,20:16,32:16,36:32
+CONFIGS=5:4,8:4,16:8,17:16,18:16,20:16,32:16,34:32,36:32
 
 echo ">> [1/3] latency grid (RDMA 4 KB plus 1 KB and 9 KB)"
 ./bench_isal latency --configs $CONFIGS --ml 1,2,4,max --pkts 1024,4096,9216 \
