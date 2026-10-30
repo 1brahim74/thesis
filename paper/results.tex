@@ -2,8 +2,7 @@
 %   bench_isal/results/ip-172-31-22-156-20261030-0546  (decode costs, AWS c7i.2xlarge, Xeon Platinum 8488C) — primary
 %   bench_isal/results/DESKTOP-MDBVB0T-20261030-1146   (decode costs, i9-14900HX laptop) — cross-check
 %   fecsim, 64-flow table: 1,000 steps/point with the server decode table (same seeds as run_sweeps.sh)
-% Figures: regenerate with  fecsim/run_sweeps.sh ../bench_isal/results/ip-172-31-22-156-20261030-0546/latency.csv
-%          then copy figures/fig{1,3}*.png next to this file.
+%   fecsim/results/20261030-1413  (full sweep with the server decode table; figures fig1, fig3, fig6, fig7 copied here)
 
 \section{Evaluation}
 \label{sec:eval}
@@ -93,6 +92,31 @@ boundary. FEC with an erasure-count decoder wins for small messages at loss rate
 above, and the region where it wins grows with RTT. ISA-L decoding shrinks that region to almost
 nothing at RTTs of 5\,\textmu s or less.
 
+\paragraph{How much parity.} Figure~\ref{fig:overhead} plots tail latency against parity overhead.
+At $10^{-4}$--$10^{-3}$ loss the 6.25\% codes are best: RS(17,16) completes a 64-flow step of
+128\,KB in 14.5\,\textmu s, against 23.3\,\textmu s for the best retransmission. At $10^{-2}$ loss
+they no longer carry enough parity. Too many codewords lose more than one packet, fall back to
+retransmission and hit the timeout (118.6\,\textmu s). RS(20,16), with 25\% overhead, completes in
+16.7\,\textmu s. The right amount of parity therefore grows with the loss rate. For single messages
+of 2\,MB no amount of parity beats retransmission below 1\% loss.
+
+\paragraph{Bursty loss calibrated to production measurements.} Losses in datacenters are bursty.
+Ghabashneh et al.~\cite{ghabashneh2022} measured Meta racks:
+\begin{itemize}
+  \item bursts last a median of 2\,ms (90th percentile 8\,ms);
+  \item they occur 7.5--39.8 times per second;
+  \item 0.4--5\% of them drop packets.
+\end{itemize}
+We convert these numbers into a two-state burst model that advances in wall-clock time, with
+lossy bursts of mean 2.9\,ms occupying $2.2\times10^{-4}$ (typical rack), $1.15\times10^{-3}$
+(busy) or $5.8\times10^{-3}$ (contended) of the time. The loss rate inside a burst is not
+published, so we sweep it. The same reversal appears (Figure~\ref{fig:bursts}). For a 64-flow step
+of 128\,KB in a busy rack with 10\% loss inside bursts, the best retransmission takes
+25.0\,\textmu s, FEC with ISA-L 51.7\,\textmu s, and FEC with erasure-count decoding
+17.1\,\textmu s. In a contended rack with 1\% in-burst loss the figures are 18.3, 34.4 and
+14.5\,\textmu s. At 30\% in-burst loss every scheme degrades, because no code we evaluate carries
+enough parity for a multi-millisecond burst.
+
 \paragraph{Which erasure-count decoder matters little.} cm256 and erasure-count decoding on ISA-L's
 kernel differ by at most 2.2\,\textmu s at the 99th percentile in the collective configurations above
 (3.7\,\textmu s across the full laptop sweep), even though cm256 decodes up to 2.6$\times$ slower. Once decoding costs about
@@ -114,10 +138,27 @@ size. Rows are RTTs and columns are decoders. Blue means FEC wins.}
 \label{fig:ratio}
 \end{figure*}
 
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\linewidth]{fig6_overhead.png}
+\caption{p99 completion versus parity overhead for each code (erasure-count decoding on ISA-L's kernel).
+Dotted lines: best retransmission at the same loss rate.}
+\label{fig:overhead}
+\end{figure*}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\linewidth]{fig7_measured_bursts.png}
+\caption{p99 completion of a 64-flow step under bursty loss calibrated to Meta rack
+measurements~\cite{ghabashneh2022}, for three rack types and three in-burst loss rates.}
+\label{fig:bursts}
+\end{figure*}
+
 \subsection{Limitations}
 Our model has no congestion control, PFC or NIC pipeline. The flows in a collective step are
 independent and do not share a bottleneck, the sender is not window-limited, and acknowledgements
 are never lost. Decode costs are single-core medians from one cloud server and one laptop, without
-frequency pinning (EC2 guests do not expose it). Losses here are i.i.d.; a bursty model calibrated
-to production measurements is evaluated separately. Commodity RoCE timeouts are often far above
+frequency pinning (EC2 guests do not expose it). In the bursty model, bursts are independent
+across flows, whereas a real incast burst hits every flow to the same receiver at once, and the
+in-burst loss rate is swept rather than measured. Commodity RoCE timeouts are often far above
 100\,\textmu s, which would favour FEC and SR+TLP further.
