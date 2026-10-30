@@ -1,0 +1,2 @@
+ISAs available: scalar avx2 avx512
+7095 passed, 0 failed

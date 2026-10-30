@@ -1,0 +1,1769 @@
+rm -rf cm256-src
+git clone -q https://github.com/catid/cm256.git cm256-src
+cd cm256-src && git checkout -q 634d1e36b095dbba937586a7e9843d828762dae4
+g++ -std=c++17 -O3 -mavx2 -w -Icm256-src/include -c cm256-src/src/cm256.cpp -o cm256-src/cm256.o
+g++ -std=c++17 -O3 -mavx2 -w -Icm256-src/include -c cm256-src/src/gf256.cpp -o cm256-src/gf256.o
+g++ -std=c++17 -O3 -Wall -Wextra  -Icm256-src/include -o test_simd test_simd.cpp cm256-src/cm256.o cm256-src/gf256.o -lisal
+./test_simd
+ISAs available: scalar avx2 avx512
+7095 passed, 0 failed
+>> correctness tests
+ISAs available: scalar avx2 avx512
+7095 passed, 0 failed
+pinned latency core: 1; throughput cores: 1,2,3
+>> [1/3] latency grid (RDMA 4 KB plus 1 KB and 9 KB)
+CPU: Intel(R) Xeon(R) Platinum 8488C | best ISA: avx512 | data: warm
+  RS(5,4) m'=1 L=1024 v3_scalar       total_med=    3021 ns
+  RS(5,4) m'=1 L=1024 ours_avx2       total_med=     206 ns
+  RS(5,4) m'=1 L=1024 ours_avx512     total_med=     190 ns
+  RS(5,4) m'=1 L=1024 isal_avx2       total_med=     701 ns
+  RS(5,4) m'=1 L=1024 isal_avx512     total_med=     683 ns
+  RS(5,4) m'=1 L=1024 isal_default    total_med=     500 ns
+  RS(5,4) m'=1 L=1024 hybrid_avx2     total_med=     358 ns
+  RS(5,4) m'=1 L=1024 hybrid_avx512   total_med=     318 ns
+  RS(5,4) m'=1 L=1024 hybrid_default  total_med=     145 ns
+  RS(5,4) m'=1 L=1024 cm256           total_med=      72 ns
+  RS(5,4) m'=1 L=4096 v3_scalar       total_med=    9510 ns
+  RS(5,4) m'=1 L=4096 ours_avx2       total_med=     489 ns
+  RS(5,4) m'=1 L=4096 ours_avx512     total_med=     393 ns
+  RS(5,4) m'=1 L=4096 isal_avx2       total_med=    1072 ns
+  RS(5,4) m'=1 L=4096 isal_avx512     total_med=     992 ns
+  RS(5,4) m'=1 L=4096 isal_default    total_med=     670 ns
+  RS(5,4) m'=1 L=4096 hybrid_avx2     total_med=     756 ns
+  RS(5,4) m'=1 L=4096 hybrid_avx512   total_med=     647 ns
+  RS(5,4) m'=1 L=4096 hybrid_default  total_med=     339 ns
+  RS(5,4) m'=1 L=4096 cm256           total_med=     192 ns
+  RS(5,4) m'=1 L=9216 v3_scalar       total_med=   20432 ns
+  RS(5,4) m'=1 L=9216 ours_avx2       total_med=    1025 ns
+  RS(5,4) m'=1 L=9216 ours_avx512     total_med=     758 ns
+  RS(5,4) m'=1 L=9216 isal_avx2       total_med=    1760 ns
+  RS(5,4) m'=1 L=9216 isal_avx512     total_med=    1459 ns
+  RS(5,4) m'=1 L=9216 isal_default    total_med=     996 ns
+  RS(5,4) m'=1 L=9216 hybrid_avx2     total_med=    1318 ns
+  RS(5,4) m'=1 L=9216 hybrid_avx512   total_med=    1056 ns
+  RS(5,4) m'=1 L=9216 hybrid_default  total_med=     648 ns
+  RS(5,4) m'=1 L=9216 cm256           total_med=     396 ns
+  RS(8,4) m'=1 L=1024 v3_scalar       total_med=    3032 ns
+  RS(8,4) m'=1 L=1024 ours_avx2       total_med=     206 ns
+  RS(8,4) m'=1 L=1024 ours_avx512     total_med=     190 ns
+  RS(8,4) m'=1 L=1024 isal_avx2       total_med=     707 ns
+  RS(8,4) m'=1 L=1024 isal_avx512     total_med=     685 ns
+  RS(8,4) m'=1 L=1024 isal_default    total_med=     503 ns
+  RS(8,4) m'=1 L=1024 hybrid_avx2     total_med=     345 ns
+  RS(8,4) m'=1 L=1024 hybrid_avx512   total_med=     321 ns
+  RS(8,4) m'=1 L=1024 hybrid_default  total_med=     145 ns
+  RS(8,4) m'=1 L=1024 cm256           total_med=     115 ns
+  RS(8,4) m'=2 L=1024 v3_scalar       total_med=    5955 ns
+  RS(8,4) m'=2 L=1024 ours_avx2       total_med=     309 ns
+  RS(8,4) m'=2 L=1024 ours_avx512     total_med=     278 ns
+  RS(8,4) m'=2 L=1024 isal_avx2       total_med=     808 ns
+  RS(8,4) m'=2 L=1024 isal_avx512     total_med=     793 ns
+  RS(8,4) m'=2 L=1024 isal_default    total_med=     517 ns
+  RS(8,4) m'=2 L=1024 hybrid_avx2     total_med=     528 ns
+  RS(8,4) m'=2 L=1024 hybrid_avx512   total_med=     520 ns
+  RS(8,4) m'=2 L=1024 hybrid_default  total_med=     182 ns
+  RS(8,4) m'=2 L=1024 cm256           total_med=     195 ns
+  RS(8,4) m'=4 L=1024 v3_scalar       total_med=   11994 ns
+  RS(8,4) m'=4 L=1024 ours_avx2       total_med=     530 ns
+  RS(8,4) m'=4 L=1024 ours_avx512     total_med=     439 ns
+  RS(8,4) m'=4 L=1024 isal_avx2       total_med=     967 ns
+  RS(8,4) m'=4 L=1024 isal_avx512     total_med=     920 ns
+  RS(8,4) m'=4 L=1024 isal_default    total_med=     515 ns
+  RS(8,4) m'=4 L=1024 hybrid_avx2     total_med=     714 ns
+  RS(8,4) m'=4 L=1024 hybrid_avx512   total_med=     679 ns
+  RS(8,4) m'=4 L=1024 hybrid_default  total_med=     272 ns
+  RS(8,4) m'=4 L=1024 cm256           total_med=     403 ns
+  RS(8,4) m'=1 L=4096 v3_scalar       total_med=    9414 ns
+  RS(8,4) m'=1 L=4096 ours_avx2       total_med=     489 ns
+  RS(8,4) m'=1 L=4096 ours_avx512     total_med=     391 ns
+  RS(8,4) m'=1 L=4096 isal_avx2       total_med=    1093 ns
+  RS(8,4) m'=1 L=4096 isal_avx512     total_med=    1008 ns
+  RS(8,4) m'=1 L=4096 isal_default    total_med=     671 ns
+  RS(8,4) m'=1 L=4096 hybrid_avx2     total_med=     702 ns
+  RS(8,4) m'=1 L=4096 hybrid_avx512   total_med=     608 ns
+  RS(8,4) m'=1 L=4096 hybrid_default  total_med=     343 ns
+  RS(8,4) m'=1 L=4096 cm256           total_med=     198 ns
+  RS(8,4) m'=2 L=4096 v3_scalar       total_med=   18271 ns
+  RS(8,4) m'=2 L=4096 ours_avx2       total_med=     728 ns
+  RS(8,4) m'=2 L=4096 ours_avx512     total_med=     579 ns
+  RS(8,4) m'=2 L=4096 isal_avx2       total_med=    1435 ns
+  RS(8,4) m'=2 L=4096 isal_avx512     total_med=    1223 ns
+  RS(8,4) m'=2 L=4096 isal_default    total_med=     709 ns
+  RS(8,4) m'=2 L=4096 hybrid_avx2     total_med=    1014 ns
+  RS(8,4) m'=2 L=4096 hybrid_avx512   total_med=     872 ns
+  RS(8,4) m'=2 L=4096 hybrid_default  total_med=     340 ns
+  RS(8,4) m'=2 L=4096 cm256           total_med=     559 ns
+  RS(8,4) m'=4 L=4096 v3_scalar       total_med=   36369 ns
+  RS(8,4) m'=4 L=4096 ours_avx2       total_med=    1294 ns
+  RS(8,4) m'=4 L=4096 ours_avx512     total_med=     941 ns
+  RS(8,4) m'=4 L=4096 isal_avx2       total_med=    1942 ns
+  RS(8,4) m'=4 L=4096 isal_avx512     total_med=    1853 ns
+  RS(8,4) m'=4 L=4096 isal_default    total_med=     829 ns
+  RS(8,4) m'=4 L=4096 hybrid_avx2     total_med=    1687 ns
+  RS(8,4) m'=4 L=4096 hybrid_avx512   total_med=    1544 ns
+  RS(8,4) m'=4 L=4096 hybrid_default  total_med=     590 ns
+  RS(8,4) m'=4 L=4096 cm256           total_med=    1215 ns
+  RS(8,4) m'=1 L=9216 v3_scalar       total_med=   20498 ns
+  RS(8,4) m'=1 L=9216 ours_avx2       total_med=    1002 ns
+  RS(8,4) m'=1 L=9216 ours_avx512     total_med=     894 ns
+  RS(8,4) m'=1 L=9216 isal_avx2       total_med=    1709 ns
+  RS(8,4) m'=1 L=9216 isal_avx512     total_med=    1470 ns
+  RS(8,4) m'=1 L=9216 isal_default    total_med=     969 ns
+  RS(8,4) m'=1 L=9216 hybrid_avx2     total_med=    1386 ns
+  RS(8,4) m'=1 L=9216 hybrid_avx512   total_med=    1198 ns
+  RS(8,4) m'=1 L=9216 hybrid_default  total_med=     649 ns
+  RS(8,4) m'=1 L=9216 cm256           total_med=     520 ns
+  RS(8,4) m'=2 L=9216 v3_scalar       total_med=   39043 ns
+  RS(8,4) m'=2 L=9216 ours_avx2       total_med=    1547 ns
+  RS(8,4) m'=2 L=9216 ours_avx512     total_med=    1111 ns
+  RS(8,4) m'=2 L=9216 isal_avx2       total_med=    2436 ns
+  RS(8,4) m'=2 L=9216 isal_avx512     total_med=    2118 ns
+  RS(8,4) m'=2 L=9216 isal_default    total_med=    1056 ns
+  RS(8,4) m'=2 L=9216 hybrid_avx2     total_med=    2070 ns
+  RS(8,4) m'=2 L=9216 hybrid_avx512   total_med=    1829 ns
+  RS(8,4) m'=2 L=9216 hybrid_default  total_med=     695 ns
+  RS(8,4) m'=2 L=9216 cm256           total_med=    1251 ns
+  RS(8,4) m'=4 L=9216 v3_scalar       total_med=   76901 ns
+  RS(8,4) m'=4 L=9216 ours_avx2       total_med=    2802 ns
+  RS(8,4) m'=4 L=9216 ours_avx512     total_med=    2346 ns
+  RS(8,4) m'=4 L=9216 isal_avx2       total_med=    3623 ns
+  RS(8,4) m'=4 L=9216 isal_avx512     total_med=    3186 ns
+  RS(8,4) m'=4 L=9216 isal_default    total_med=    1554 ns
+  RS(8,4) m'=4 L=9216 hybrid_avx2     total_med=    3329 ns
+  RS(8,4) m'=4 L=9216 hybrid_avx512   total_med=    2886 ns
+  RS(8,4) m'=4 L=9216 hybrid_default  total_med=    1337 ns
+  RS(8,4) m'=4 L=9216 cm256           total_med=    2520 ns
+  RS(16,8) m'=1 L=1024 v3_scalar       total_med=    5942 ns
+  RS(16,8) m'=1 L=1024 ours_avx2       total_med=     329 ns
+  RS(16,8) m'=1 L=1024 ours_avx512     total_med=     297 ns
+  RS(16,8) m'=1 L=1024 isal_avx2       total_med=    3155 ns
+  RS(16,8) m'=1 L=1024 isal_avx512     total_med=    3103 ns
+  RS(16,8) m'=1 L=1024 isal_default    total_med=    2849 ns
+  RS(16,8) m'=1 L=1024 hybrid_avx2     total_med=     487 ns
+  RS(16,8) m'=1 L=1024 hybrid_avx512   total_med=     430 ns
+  RS(16,8) m'=1 L=1024 hybrid_default  total_med=     194 ns
+  RS(16,8) m'=1 L=1024 cm256           total_med=     158 ns
+  RS(16,8) m'=2 L=1024 v3_scalar       total_med=   10839 ns
+  RS(16,8) m'=2 L=1024 ours_avx2       total_med=     512 ns
+  RS(16,8) m'=2 L=1024 ours_avx512     total_med=     445 ns
+  RS(16,8) m'=2 L=1024 isal_avx2       total_med=    3443 ns
+  RS(16,8) m'=2 L=1024 isal_avx512     total_med=    3344 ns
+  RS(16,8) m'=2 L=1024 isal_default    total_med=    2885 ns
+  RS(16,8) m'=2 L=1024 hybrid_avx2     total_med=     749 ns
+  RS(16,8) m'=2 L=1024 hybrid_avx512   total_med=     688 ns
+  RS(16,8) m'=2 L=1024 hybrid_default  total_med=     260 ns
+  RS(16,8) m'=2 L=1024 cm256           total_med=     353 ns
+  RS(16,8) m'=4 L=1024 v3_scalar       total_med=   21952 ns
+  RS(16,8) m'=4 L=1024 ours_avx2       total_med=     967 ns
+  RS(16,8) m'=4 L=1024 ours_avx512     total_med=     861 ns
+  RS(16,8) m'=4 L=1024 isal_avx2       total_med=    3792 ns
+  RS(16,8) m'=4 L=1024 isal_avx512     total_med=    3645 ns
+  RS(16,8) m'=4 L=1024 isal_default    total_med=    2968 ns
+  RS(16,8) m'=4 L=1024 hybrid_avx2     total_med=    1223 ns
+  RS(16,8) m'=4 L=1024 hybrid_avx512   total_med=    1130 ns
+  RS(16,8) m'=4 L=1024 hybrid_default  total_med=     480 ns
+  RS(16,8) m'=4 L=1024 cm256           total_med=     753 ns
+  RS(16,8) m'=8 L=1024 v3_scalar       total_med=   46807 ns
+  RS(16,8) m'=8 L=1024 ours_avx2       total_med=    2266 ns
+  RS(16,8) m'=8 L=1024 ours_avx512     total_med=    1794 ns
+  RS(16,8) m'=8 L=1024 isal_avx2       total_med=    4181 ns
+  RS(16,8) m'=8 L=1024 isal_avx512     total_med=    4050 ns
+  RS(16,8) m'=8 L=1024 isal_default    total_med=    2826 ns
+  RS(16,8) m'=8 L=1024 hybrid_avx2     total_med=    2441 ns
+  RS(16,8) m'=8 L=1024 hybrid_avx512   total_med=    2400 ns
+  RS(16,8) m'=8 L=1024 hybrid_default  total_med=    1231 ns
+  RS(16,8) m'=8 L=1024 cm256           total_med=    1565 ns
+  RS(16,8) m'=1 L=4096 v3_scalar       total_med=   19013 ns
+  RS(16,8) m'=1 L=4096 ours_avx2       total_med=     916 ns
+  RS(16,8) m'=1 L=4096 ours_avx512     total_med=     824 ns
+  RS(16,8) m'=1 L=4096 isal_avx2       total_med=    4017 ns
+  RS(16,8) m'=1 L=4096 isal_avx512     total_med=    3805 ns
+  RS(16,8) m'=1 L=4096 isal_default    total_med=    3137 ns
+  RS(16,8) m'=1 L=4096 hybrid_avx2     total_med=    1268 ns
+  RS(16,8) m'=1 L=4096 hybrid_avx512   total_med=    1008 ns
+  RS(16,8) m'=1 L=4096 hybrid_default  total_med=     481 ns
+  RS(16,8) m'=1 L=4096 cm256           total_med=     426 ns
+  RS(16,8) m'=2 L=4096 v3_scalar       total_med=   35680 ns
+  RS(16,8) m'=2 L=4096 ours_avx2       total_med=    1350 ns
+  RS(16,8) m'=2 L=4096 ours_avx512     total_med=    1186 ns
+  RS(16,8) m'=2 L=4096 isal_avx2       total_med=    4661 ns
+  RS(16,8) m'=2 L=4096 isal_avx512     total_med=    4324 ns
+  RS(16,8) m'=2 L=4096 isal_default    total_med=    3282 ns
+  RS(16,8) m'=2 L=4096 hybrid_avx2     total_med=    2014 ns
+  RS(16,8) m'=2 L=4096 hybrid_avx512   total_med=    1532 ns
+  RS(16,8) m'=2 L=4096 hybrid_default  total_med=     683 ns
+  RS(16,8) m'=2 L=4096 cm256           total_med=    1167 ns
+  RS(16,8) m'=4 L=4096 v3_scalar       total_med=   70341 ns
+  RS(16,8) m'=4 L=4096 ours_avx2       total_med=    2456 ns
+  RS(16,8) m'=4 L=4096 ours_avx512     total_med=    1999 ns
+  RS(16,8) m'=4 L=4096 isal_avx2       total_med=    5888 ns
+  RS(16,8) m'=4 L=4096 isal_avx512     total_med=    5516 ns
+  RS(16,8) m'=4 L=4096 isal_default    total_med=    3685 ns
+  RS(16,8) m'=4 L=4096 hybrid_avx2     total_med=    3123 ns
+  RS(16,8) m'=4 L=4096 hybrid_avx512   total_med=    2997 ns
+  RS(16,8) m'=4 L=4096 hybrid_default  total_med=    1121 ns
+  RS(16,8) m'=4 L=4096 cm256           total_med=    2450 ns
+  RS(16,8) m'=8 L=4096 v3_scalar       total_med=  142567 ns
+  RS(16,8) m'=8 L=4096 ours_avx2       total_med=    4764 ns
+  RS(16,8) m'=8 L=4096 ours_avx512     total_med=    3610 ns
+  RS(16,8) m'=8 L=4096 isal_avx2       total_med=    7846 ns
+  RS(16,8) m'=8 L=4096 isal_avx512     total_med=    7446 ns
+  RS(16,8) m'=8 L=4096 isal_default    total_med=    4044 ns
+  RS(16,8) m'=8 L=4096 hybrid_avx2     total_med=    6352 ns
+  RS(16,8) m'=8 L=4096 hybrid_avx512   total_med=    5711 ns
+  RS(16,8) m'=8 L=4096 hybrid_default  total_med=    2218 ns
+  RS(16,8) m'=8 L=4096 cm256           total_med=    5243 ns
+  RS(16,8) m'=1 L=9216 v3_scalar       total_med=   40290 ns
+  RS(16,8) m'=1 L=9216 ours_avx2       total_med=    2039 ns
+  RS(16,8) m'=1 L=9216 ours_avx512     total_med=    1505 ns
+  RS(16,8) m'=1 L=9216 isal_avx2       total_med=    5233 ns
+  RS(16,8) m'=1 L=9216 isal_avx512     total_med=    4799 ns
+  RS(16,8) m'=1 L=9216 isal_default    total_med=    3782 ns
+  RS(16,8) m'=1 L=9216 hybrid_avx2     total_med=    2544 ns
+  RS(16,8) m'=1 L=9216 hybrid_avx512   total_med=    2039 ns
+  RS(16,8) m'=1 L=9216 hybrid_default  total_med=     984 ns
+  RS(16,8) m'=1 L=9216 cm256           total_med=    1286 ns
+  RS(16,8) m'=2 L=9216 v3_scalar       total_med=   76883 ns
+  RS(16,8) m'=2 L=9216 ours_avx2       total_med=    2992 ns
+  RS(16,8) m'=2 L=9216 ours_avx512     total_med=    2023 ns
+  RS(16,8) m'=2 L=9216 isal_avx2       total_med=    6856 ns
+  RS(16,8) m'=2 L=9216 isal_avx512     total_med=    5870 ns
+  RS(16,8) m'=2 L=9216 isal_default    total_med=    4046 ns
+  RS(16,8) m'=2 L=9216 hybrid_avx2     total_med=    3789 ns
+  RS(16,8) m'=2 L=9216 hybrid_avx512   total_med=    3293 ns
+  RS(16,8) m'=2 L=9216 hybrid_default  total_med=    1296 ns
+  RS(16,8) m'=2 L=9216 cm256           total_med=    2611 ns
+  RS(16,8) m'=4 L=9216 v3_scalar       total_med=  151239 ns
+  RS(16,8) m'=4 L=9216 ours_avx2       total_med=    5076 ns
+  RS(16,8) m'=4 L=9216 ours_avx512     total_med=    3436 ns
+  RS(16,8) m'=4 L=9216 isal_avx2       total_med=    9450 ns
+  RS(16,8) m'=4 L=9216 isal_avx512     total_med=    8672 ns
+  RS(16,8) m'=4 L=9216 isal_default    total_med=    4710 ns
+  RS(16,8) m'=4 L=9216 hybrid_avx2     total_med=    6311 ns
+  RS(16,8) m'=4 L=9216 hybrid_avx512   total_med=    5590 ns
+  RS(16,8) m'=4 L=9216 hybrid_default  total_med=    1885 ns
+  RS(16,8) m'=4 L=9216 cm256           total_med=    6068 ns
+  RS(16,8) m'=8 L=9216 v3_scalar       total_med=  303994 ns
+  RS(16,8) m'=8 L=9216 ours_avx2       total_med=    9361 ns
+  RS(16,8) m'=8 L=9216 ours_avx512     total_med=    6781 ns
+  RS(16,8) m'=8 L=9216 isal_avx2       total_med=   14202 ns
+  RS(16,8) m'=8 L=9216 isal_avx512     total_med=   12992 ns
+  RS(16,8) m'=8 L=9216 isal_default    total_med=    5575 ns
+  RS(16,8) m'=8 L=9216 hybrid_avx2     total_med=   12738 ns
+  RS(16,8) m'=8 L=9216 hybrid_avx512   total_med=   11418 ns
+  RS(16,8) m'=8 L=9216 hybrid_default  total_med=    3918 ns
+  RS(16,8) m'=8 L=9216 cm256           total_med=   11992 ns
+  RS(17,16) m'=1 L=1024 v3_scalar       total_med=   10996 ns
+  RS(17,16) m'=1 L=1024 ours_avx2       total_med=     542 ns
+  RS(17,16) m'=1 L=1024 ours_avx512     total_med=     437 ns
+  RS(17,16) m'=1 L=1024 isal_avx2       total_med=   20739 ns
+  RS(17,16) m'=1 L=1024 isal_avx512     total_med=   20686 ns
+  RS(17,16) m'=1 L=1024 isal_default    total_med=   20129 ns
+  RS(17,16) m'=1 L=1024 hybrid_avx2     total_med=     837 ns
+  RS(17,16) m'=1 L=1024 hybrid_avx512   total_med=     806 ns
+  RS(17,16) m'=1 L=1024 hybrid_default  total_med=     299 ns
+  RS(17,16) m'=1 L=1024 cm256           total_med=     201 ns
+  RS(17,16) m'=1 L=4096 v3_scalar       total_med=   36898 ns
+  RS(17,16) m'=1 L=4096 ours_avx2       total_med=    1596 ns
+  RS(17,16) m'=1 L=4096 ours_avx512     total_med=    1276 ns
+  RS(17,16) m'=1 L=4096 isal_avx2       total_med=   22692 ns
+  RS(17,16) m'=1 L=4096 isal_avx512     total_med=   22163 ns
+  RS(17,16) m'=1 L=4096 isal_default    total_med=   20739 ns
+  RS(17,16) m'=1 L=4096 hybrid_avx2     total_med=    2333 ns
+  RS(17,16) m'=1 L=4096 hybrid_avx512   total_med=    1632 ns
+  RS(17,16) m'=1 L=4096 hybrid_default  total_med=     836 ns
+  RS(17,16) m'=1 L=4096 cm256           total_med=     944 ns
+  RS(17,16) m'=1 L=9216 v3_scalar       total_med=   79580 ns
+  RS(17,16) m'=1 L=9216 ours_avx2       total_med=    3273 ns
+  RS(17,16) m'=1 L=9216 ours_avx512     total_med=    2650 ns
+  RS(17,16) m'=1 L=9216 isal_avx2       total_med=   25529 ns
+  RS(17,16) m'=1 L=9216 isal_avx512     total_med=   24374 ns
+  RS(17,16) m'=1 L=9216 isal_default    total_med=   22024 ns
+  RS(17,16) m'=1 L=9216 hybrid_avx2     total_med=    4762 ns
+  RS(17,16) m'=1 L=9216 hybrid_avx512   total_med=    3193 ns
+  RS(17,16) m'=1 L=9216 hybrid_default  total_med=    1903 ns
+  RS(17,16) m'=1 L=9216 cm256           total_med=    2103 ns
+  RS(18,16) m'=1 L=1024 v3_scalar       total_med=   11007 ns
+  RS(18,16) m'=1 L=1024 ours_avx2       total_med=     543 ns
+  RS(18,16) m'=1 L=1024 ours_avx512     total_med=     438 ns
+  RS(18,16) m'=1 L=1024 isal_avx2       total_med=   20748 ns
+  RS(18,16) m'=1 L=1024 isal_avx512     total_med=   20672 ns
+  RS(18,16) m'=1 L=1024 isal_default    total_med=   20161 ns
+  RS(18,16) m'=1 L=1024 hybrid_avx2     total_med=     830 ns
+  RS(18,16) m'=1 L=1024 hybrid_avx512   total_med=     803 ns
+  RS(18,16) m'=1 L=1024 hybrid_default  total_med=     300 ns
+  RS(18,16) m'=1 L=1024 cm256           total_med=     260 ns
+  RS(18,16) m'=2 L=1024 v3_scalar       total_med=   20673 ns
+  RS(18,16) m'=2 L=1024 ours_avx2       total_med=     816 ns
+  RS(18,16) m'=2 L=1024 ours_avx512     total_med=     724 ns
+  RS(18,16) m'=2 L=1024 isal_avx2       total_med=   21203 ns
+  RS(18,16) m'=2 L=1024 isal_avx512     total_med=   21120 ns
+  RS(18,16) m'=2 L=1024 isal_default    total_med=   20002 ns
+  RS(18,16) m'=2 L=1024 hybrid_avx2     total_med=    1274 ns
+  RS(18,16) m'=2 L=1024 hybrid_avx512   total_med=    1163 ns
+  RS(18,16) m'=2 L=1024 hybrid_default  total_med=     437 ns
+  RS(18,16) m'=2 L=1024 cm256           total_med=     634 ns
+  RS(18,16) m'=1 L=4096 v3_scalar       total_med=   36956 ns
+  RS(18,16) m'=1 L=4096 ours_avx2       total_med=    1847 ns
+  RS(18,16) m'=1 L=4096 ours_avx512     total_med=    1270 ns
+  RS(18,16) m'=1 L=4096 isal_avx2       total_med=   22721 ns
+  RS(18,16) m'=1 L=4096 isal_avx512     total_med=   22312 ns
+  RS(18,16) m'=1 L=4096 isal_default    total_med=   20952 ns
+  RS(18,16) m'=1 L=4096 hybrid_avx2     total_med=    2383 ns
+  RS(18,16) m'=1 L=4096 hybrid_avx512   total_med=    1630 ns
+  RS(18,16) m'=1 L=4096 hybrid_default  total_med=     833 ns
+  RS(18,16) m'=1 L=4096 cm256           total_med=    1015 ns
+  RS(18,16) m'=2 L=4096 v3_scalar       total_med=   70590 ns
+  RS(18,16) m'=2 L=4096 ours_avx2       total_med=    2754 ns
+  RS(18,16) m'=2 L=4096 ours_avx512     total_med=    1832 ns
+  RS(18,16) m'=2 L=4096 isal_avx2       total_med=   24123 ns
+  RS(18,16) m'=2 L=4096 isal_avx512     total_med=   23346 ns
+  RS(18,16) m'=2 L=4096 isal_default    total_med=   20911 ns
+  RS(18,16) m'=2 L=4096 hybrid_avx2     total_med=    3568 ns
+  RS(18,16) m'=2 L=4096 hybrid_avx512   total_med=    3056 ns
+  RS(18,16) m'=2 L=4096 hybrid_default  total_med=    1032 ns
+  RS(18,16) m'=2 L=4096 cm256           total_med=    2119 ns
+  RS(18,16) m'=1 L=9216 v3_scalar       total_med=   79560 ns
+  RS(18,16) m'=1 L=9216 ours_avx2       total_med=    3265 ns
+  RS(18,16) m'=1 L=9216 ours_avx512     total_med=    2625 ns
+  RS(18,16) m'=1 L=9216 isal_avx2       total_med=   25423 ns
+  RS(18,16) m'=1 L=9216 isal_avx512     total_med=   24466 ns
+  RS(18,16) m'=1 L=9216 isal_default    total_med=   22207 ns
+  RS(18,16) m'=1 L=9216 hybrid_avx2     total_med=    4817 ns
+  RS(18,16) m'=1 L=9216 hybrid_avx512   total_med=    3291 ns
+  RS(18,16) m'=1 L=9216 hybrid_default  total_med=    1894 ns
+  RS(18,16) m'=1 L=9216 cm256           total_med=    2705 ns
+  RS(18,16) m'=2 L=9216 v3_scalar       total_med=  152620 ns
+  RS(18,16) m'=2 L=9216 ours_avx2       total_med=    5673 ns
+  RS(18,16) m'=2 L=9216 ours_avx512     total_med=    3675 ns
+  RS(18,16) m'=2 L=9216 isal_avx2       total_med=   28211 ns
+  RS(18,16) m'=2 L=9216 isal_avx512     total_med=   26712 ns
+  RS(18,16) m'=2 L=9216 isal_default    total_med=   22359 ns
+  RS(18,16) m'=2 L=9216 hybrid_avx2     total_med=    7182 ns
+  RS(18,16) m'=2 L=9216 hybrid_avx512   total_med=    6136 ns
+  RS(18,16) m'=2 L=9216 hybrid_default  total_med=    2069 ns
+  RS(18,16) m'=2 L=9216 cm256           total_med=    4590 ns
+  RS(20,16) m'=1 L=1024 v3_scalar       total_med=   10943 ns
+  RS(20,16) m'=1 L=1024 ours_avx2       total_med=     545 ns
+  RS(20,16) m'=1 L=1024 ours_avx512     total_med=     439 ns
+  RS(20,16) m'=1 L=1024 isal_avx2       total_med=   20826 ns
+  RS(20,16) m'=1 L=1024 isal_avx512     total_med=   20685 ns
+  RS(20,16) m'=1 L=1024 isal_default    total_med=   20162 ns
+  RS(20,16) m'=1 L=1024 hybrid_avx2     total_med=     848 ns
+  RS(20,16) m'=1 L=1024 hybrid_avx512   total_med=     702 ns
+  RS(20,16) m'=1 L=1024 hybrid_default  total_med=     298 ns
+  RS(20,16) m'=1 L=1024 cm256           total_med=     323 ns
+  RS(20,16) m'=2 L=1024 v3_scalar       total_med=   20730 ns
+  RS(20,16) m'=2 L=1024 ours_avx2       total_med=     822 ns
+  RS(20,16) m'=2 L=1024 ours_avx512     total_med=     722 ns
+  RS(20,16) m'=2 L=1024 isal_avx2       total_med=   20949 ns
+  RS(20,16) m'=2 L=1024 isal_avx512     total_med=   20897 ns
+  RS(20,16) m'=2 L=1024 isal_default    total_med=   20021 ns
+  RS(20,16) m'=2 L=1024 hybrid_avx2     total_med=    1229 ns
+  RS(20,16) m'=2 L=1024 hybrid_avx512   total_med=    1069 ns
+  RS(20,16) m'=2 L=1024 hybrid_default  total_med=     436 ns
+  RS(20,16) m'=2 L=1024 cm256           total_med=     629 ns
+  RS(20,16) m'=4 L=1024 v3_scalar       total_med=   41035 ns
+  RS(20,16) m'=4 L=1024 ours_avx2       total_med=    1562 ns
+  RS(20,16) m'=4 L=1024 ours_avx512     total_med=    1216 ns
+  RS(20,16) m'=4 L=1024 isal_avx2       total_med=   22229 ns
+  RS(20,16) m'=4 L=1024 isal_avx512     total_med=   21866 ns
+  RS(20,16) m'=4 L=1024 isal_default    total_med=   20261 ns
+  RS(20,16) m'=4 L=1024 hybrid_avx2     total_med=    2207 ns
+  RS(20,16) m'=4 L=1024 hybrid_avx512   total_med=    1995 ns
+  RS(20,16) m'=4 L=1024 hybrid_default  total_med=     891 ns
+  RS(20,16) m'=4 L=1024 cm256           total_med=    1400 ns
+  RS(20,16) m'=1 L=4096 v3_scalar       total_med=   37004 ns
+  RS(20,16) m'=1 L=4096 ours_avx2       total_med=    1842 ns
+  RS(20,16) m'=1 L=4096 ours_avx512     total_med=    1277 ns
+  RS(20,16) m'=1 L=4096 isal_avx2       total_med=   22777 ns
+  RS(20,16) m'=1 L=4096 isal_avx512     total_med=   22391 ns
+  RS(20,16) m'=1 L=4096 isal_default    total_med=   20962 ns
+  RS(20,16) m'=1 L=4096 hybrid_avx2     total_med=    2427 ns
+  RS(20,16) m'=1 L=4096 hybrid_avx512   total_med=    1630 ns
+  RS(20,16) m'=1 L=4096 hybrid_default  total_med=     845 ns
+  RS(20,16) m'=1 L=4096 cm256           total_med=     882 ns
+  RS(20,16) m'=2 L=4096 v3_scalar       total_med=   70452 ns
+  RS(20,16) m'=2 L=4096 ours_avx2       total_med=    2740 ns
+  RS(20,16) m'=2 L=4096 ours_avx512     total_med=    1817 ns
+  RS(20,16) m'=2 L=4096 isal_avx2       total_med=   23700 ns
+  RS(20,16) m'=2 L=4096 isal_avx512     total_med=   23270 ns
+  RS(20,16) m'=2 L=4096 isal_default    total_med=   21173 ns
+  RS(20,16) m'=2 L=4096 hybrid_avx2     total_med=    3779 ns
+  RS(20,16) m'=2 L=4096 hybrid_avx512   total_med=    3115 ns
+  RS(20,16) m'=2 L=4096 hybrid_default  total_med=    1074 ns
+  RS(20,16) m'=2 L=4096 cm256           total_med=    2287 ns
+  RS(20,16) m'=4 L=4096 v3_scalar       total_med=  138211 ns
+  RS(20,16) m'=4 L=4096 ours_avx2       total_med=    4581 ns
+  RS(20,16) m'=4 L=4096 ours_avx512     total_med=    3062 ns
+  RS(20,16) m'=4 L=4096 isal_avx2       total_med=   26260 ns
+  RS(20,16) m'=4 L=4096 isal_avx512     total_med=   25341 ns
+  RS(20,16) m'=4 L=4096 isal_default    total_med=   21709 ns
+  RS(20,16) m'=4 L=4096 hybrid_avx2     total_med=    6164 ns
+  RS(20,16) m'=4 L=4096 hybrid_avx512   total_med=    5395 ns
+  RS(20,16) m'=4 L=4096 hybrid_default  total_med=    1849 ns
+  RS(20,16) m'=4 L=4096 cm256           total_med=    4989 ns
+  RS(20,16) m'=1 L=9216 v3_scalar       total_med=   79560 ns
+  RS(20,16) m'=1 L=9216 ours_avx2       total_med=    3261 ns
+  RS(20,16) m'=1 L=9216 ours_avx512     total_med=    2625 ns
+  RS(20,16) m'=1 L=9216 isal_avx2       total_med=   25368 ns
+  RS(20,16) m'=1 L=9216 isal_avx512     total_med=   24378 ns
+  RS(20,16) m'=1 L=9216 isal_default    total_med=   21982 ns
+  RS(20,16) m'=1 L=9216 hybrid_avx2     total_med=    4769 ns
+  RS(20,16) m'=1 L=9216 hybrid_avx512   total_med=    3188 ns
+  RS(20,16) m'=1 L=9216 hybrid_default  total_med=    1897 ns
+  RS(20,16) m'=1 L=9216 cm256           total_med=    2685 ns
+  RS(20,16) m'=2 L=9216 v3_scalar       total_med=  152840 ns
+  RS(20,16) m'=2 L=9216 ours_avx2       total_med=    5678 ns
+  RS(20,16) m'=2 L=9216 ours_avx512     total_med=    3668 ns
+  RS(20,16) m'=2 L=9216 isal_avx2       total_med=   28029 ns
+  RS(20,16) m'=2 L=9216 isal_avx512     total_med=   26975 ns
+  RS(20,16) m'=2 L=9216 isal_default    total_med=   22647 ns
+  RS(20,16) m'=2 L=9216 hybrid_avx2     total_med=    7201 ns
+  RS(20,16) m'=2 L=9216 hybrid_avx512   total_med=    6168 ns
+  RS(20,16) m'=2 L=9216 hybrid_default  total_med=    2147 ns
+  RS(20,16) m'=2 L=9216 cm256           total_med=    4677 ns
+  RS(20,16) m'=4 L=9216 v3_scalar       total_med=  300578 ns
+  RS(20,16) m'=4 L=9216 ours_avx2       total_med=    9616 ns
+  RS(20,16) m'=4 L=9216 ours_avx512     total_med=    6087 ns
+  RS(20,16) m'=4 L=9216 isal_avx2       total_med=   32178 ns
+  RS(20,16) m'=4 L=9216 isal_avx512     total_med=   30652 ns
+  RS(20,16) m'=4 L=9216 isal_default    total_med=   24117 ns
+  RS(20,16) m'=4 L=9216 hybrid_avx2     total_med=   12254 ns
+  RS(20,16) m'=4 L=9216 hybrid_avx512   total_med=   10787 ns
+  RS(20,16) m'=4 L=9216 hybrid_default  total_med=    3547 ns
+  RS(20,16) m'=4 L=9216 cm256           total_med=   12983 ns
+  RS(32,16) m'=1 L=1024 v3_scalar       total_med=   11029 ns
+  RS(32,16) m'=1 L=1024 ours_avx2       total_med=     585 ns
+  RS(32,16) m'=1 L=1024 ours_avx512     total_med=     513 ns
+  RS(32,16) m'=1 L=1024 isal_avx2       total_med=   20739 ns
+  RS(32,16) m'=1 L=1024 isal_avx512     total_med=   20672 ns
+  RS(32,16) m'=1 L=1024 isal_default    total_med=   20162 ns
+  RS(32,16) m'=1 L=1024 hybrid_avx2     total_med=     788 ns
+  RS(32,16) m'=1 L=1024 hybrid_avx512   total_med=     704 ns
+  RS(32,16) m'=1 L=1024 hybrid_default  total_med=     305 ns
+  RS(32,16) m'=1 L=1024 cm256           total_med=     365 ns
+  RS(32,16) m'=2 L=1024 v3_scalar       total_med=   20760 ns
+  RS(32,16) m'=2 L=1024 ours_avx2       total_med=     830 ns
+  RS(32,16) m'=2 L=1024 ours_avx512     total_med=     728 ns
+  RS(32,16) m'=2 L=1024 isal_avx2       total_med=   21179 ns
+  RS(32,16) m'=2 L=1024 isal_avx512     total_med=   20899 ns
+  RS(32,16) m'=2 L=1024 isal_default    total_med=   19991 ns
+  RS(32,16) m'=2 L=1024 hybrid_avx2     total_med=    1214 ns
+  RS(32,16) m'=2 L=1024 hybrid_avx512   total_med=    1081 ns
+  RS(32,16) m'=2 L=1024 hybrid_default  total_med=     428 ns
+  RS(32,16) m'=2 L=1024 cm256           total_med=     672 ns
+  RS(32,16) m'=4 L=1024 v3_scalar       total_med=   41169 ns
+  RS(32,16) m'=4 L=1024 ours_avx2       total_med=    1579 ns
+  RS(32,16) m'=4 L=1024 ours_avx512     total_med=    1336 ns
+  RS(32,16) m'=4 L=1024 isal_avx2       total_med=   21535 ns
+  RS(32,16) m'=4 L=1024 isal_avx512     total_med=   21384 ns
+  RS(32,16) m'=4 L=1024 isal_default    total_med=   20215 ns
+  RS(32,16) m'=4 L=1024 hybrid_avx2     total_med=    2136 ns
+  RS(32,16) m'=4 L=1024 hybrid_avx512   total_med=    2058 ns
+  RS(32,16) m'=4 L=1024 hybrid_default  total_med=     902 ns
+  RS(32,16) m'=4 L=1024 cm256           total_med=    1467 ns
+  RS(32,16) m'=16 L=1024 v3_scalar       total_med=  186205 ns
+  RS(32,16) m'=16 L=1024 ours_avx2       total_med=    8953 ns
+  RS(32,16) m'=16 L=1024 ours_avx512     total_med=    7582 ns
+  RS(32,16) m'=16 L=1024 isal_avx2       total_med=   23234 ns
+  RS(32,16) m'=16 L=1024 isal_avx512     total_med=   22639 ns
+  RS(32,16) m'=16 L=1024 isal_default    total_med=   18760 ns
+  RS(32,16) m'=16 L=1024 hybrid_avx2     total_med=   11753 ns
+  RS(32,16) m'=16 L=1024 hybrid_avx512   total_med=   10886 ns
+  RS(32,16) m'=16 L=1024 hybrid_default  total_med=    6799 ns
+  RS(32,16) m'=16 L=1024 cm256           total_med=    6422 ns
+  RS(32,16) m'=1 L=4096 v3_scalar       total_med=   36804 ns
+  RS(32,16) m'=1 L=4096 ours_avx2       total_med=    1855 ns
+  RS(32,16) m'=1 L=4096 ours_avx512     total_med=    1514 ns
+  RS(32,16) m'=1 L=4096 isal_avx2       total_med=   22780 ns
+  RS(32,16) m'=1 L=4096 isal_avx512     total_med=   22465 ns
+  RS(32,16) m'=1 L=4096 isal_default    total_med=   20951 ns
+  RS(32,16) m'=1 L=4096 hybrid_avx2     total_med=    2446 ns
+  RS(32,16) m'=1 L=4096 hybrid_avx512   total_med=    1659 ns
+  RS(32,16) m'=1 L=4096 hybrid_default  total_med=     954 ns
+  RS(32,16) m'=1 L=4096 cm256           total_med=    1282 ns
+  RS(32,16) m'=2 L=4096 v3_scalar       total_med=   70281 ns
+  RS(32,16) m'=2 L=4096 ours_avx2       total_med=    2758 ns
+  RS(32,16) m'=2 L=4096 ours_avx512     total_med=    1904 ns
+  RS(32,16) m'=2 L=4096 isal_avx2       total_med=   24192 ns
+  RS(32,16) m'=2 L=4096 isal_avx512     total_med=   23243 ns
+  RS(32,16) m'=2 L=4096 isal_default    total_med=   21143 ns
+  RS(32,16) m'=2 L=4096 hybrid_avx2     total_med=    3595 ns
+  RS(32,16) m'=2 L=4096 hybrid_avx512   total_med=    3083 ns
+  RS(32,16) m'=2 L=4096 hybrid_default  total_med=    1250 ns
+  RS(32,16) m'=2 L=4096 cm256           total_med=    2643 ns
+  RS(32,16) m'=4 L=4096 v3_scalar       total_med=  138585 ns
+  RS(32,16) m'=4 L=4096 ours_avx2       total_med=    4611 ns
+  RS(32,16) m'=4 L=4096 ours_avx512     total_med=    3091 ns
+  RS(32,16) m'=4 L=4096 isal_avx2       total_med=   26383 ns
+  RS(32,16) m'=4 L=4096 isal_avx512     total_med=   25274 ns
+  RS(32,16) m'=4 L=4096 isal_default    total_med=   21649 ns
+  RS(32,16) m'=4 L=4096 hybrid_avx2     total_med=    6174 ns
+  RS(32,16) m'=4 L=4096 hybrid_avx512   total_med=    5414 ns
+  RS(32,16) m'=4 L=4096 hybrid_default  total_med=    2176 ns
+  RS(32,16) m'=4 L=4096 cm256           total_med=    5020 ns
+  RS(32,16) m'=16 L=4096 v3_scalar       total_med=  566521 ns
+  RS(32,16) m'=16 L=4096 ours_avx2       total_med=   21204 ns
+  RS(32,16) m'=16 L=4096 ours_avx512     total_med=   14804 ns
+  RS(32,16) m'=16 L=4096 isal_avx2       total_med=   37866 ns
+  RS(32,16) m'=16 L=4096 isal_avx512     total_med=   36734 ns
+  RS(32,16) m'=16 L=4096 isal_default    total_med=   23399 ns
+  RS(32,16) m'=16 L=4096 hybrid_avx2     total_med=   25925 ns
+  RS(32,16) m'=16 L=4096 hybrid_avx512   total_med=   24361 ns
+  RS(32,16) m'=16 L=4096 hybrid_default  total_med=   10467 ns
+  RS(32,16) m'=16 L=4096 cm256           total_med=   22104 ns
+  RS(32,16) m'=1 L=9216 v3_scalar       total_med=   79686 ns
+  RS(32,16) m'=1 L=9216 ours_avx2       total_med=    3870 ns
+  RS(32,16) m'=1 L=9216 ours_avx512     total_med=    3220 ns
+  RS(32,16) m'=1 L=9216 isal_avx2       total_med=   25632 ns
+  RS(32,16) m'=1 L=9216 isal_avx512     total_med=   24591 ns
+  RS(32,16) m'=1 L=9216 isal_default    total_med=   22226 ns
+  RS(32,16) m'=1 L=9216 hybrid_avx2     total_med=    4786 ns
+  RS(32,16) m'=1 L=9216 hybrid_avx512   total_med=    3842 ns
+  RS(32,16) m'=1 L=9216 hybrid_default  total_med=    1964 ns
+  RS(32,16) m'=1 L=9216 cm256           total_med=    2714 ns
+  RS(32,16) m'=2 L=9216 v3_scalar       total_med=  152950 ns
+  RS(32,16) m'=2 L=9216 ours_avx2       total_med=    5686 ns
+  RS(32,16) m'=2 L=9216 ours_avx512     total_med=    3691 ns
+  RS(32,16) m'=2 L=9216 isal_avx2       total_med=   28456 ns
+  RS(32,16) m'=2 L=9216 isal_avx512     total_med=   27100 ns
+  RS(32,16) m'=2 L=9216 isal_default    total_med=   22441 ns
+  RS(32,16) m'=2 L=9216 hybrid_avx2     total_med=    7523 ns
+  RS(32,16) m'=2 L=9216 hybrid_avx512   total_med=    6214 ns
+  RS(32,16) m'=2 L=9216 hybrid_default  total_med=    2512 ns
+  RS(32,16) m'=2 L=9216 cm256           total_med=    5647 ns
+  RS(32,16) m'=4 L=9216 v3_scalar       total_med=  300658 ns
+  RS(32,16) m'=4 L=9216 ours_avx2       total_med=    9480 ns
+  RS(32,16) m'=4 L=9216 ours_avx512     total_med=    6085 ns
+  RS(32,16) m'=4 L=9216 isal_avx2       total_med=   33161 ns
+  RS(32,16) m'=4 L=9216 isal_avx512     total_med=   31616 ns
+  RS(32,16) m'=4 L=9216 isal_default    total_med=   24122 ns
+  RS(32,16) m'=4 L=9216 hybrid_avx2     total_med=   12299 ns
+  RS(32,16) m'=4 L=9216 hybrid_avx512   total_med=   12010 ns
+  RS(32,16) m'=4 L=9216 hybrid_default  total_med=    3576 ns
+  RS(32,16) m'=4 L=9216 cm256           total_med=   13190 ns
+  RS(32,16) m'=16 L=9216 v3_scalar       total_med= 1203603 ns
+  RS(32,16) m'=16 L=9216 ours_avx2       total_med=   40666 ns
+  RS(32,16) m'=16 L=9216 ours_avx512     total_med=   26491 ns
+  RS(32,16) m'=16 L=9216 isal_avx2       total_med=   61481 ns
+  RS(32,16) m'=16 L=9216 isal_avx512     total_med=   57359 ns
+  RS(32,16) m'=16 L=9216 isal_default    total_med=   28299 ns
+  RS(32,16) m'=16 L=9216 hybrid_avx2     total_med=   49587 ns
+  RS(32,16) m'=16 L=9216 hybrid_avx512   total_med=   45393 ns
+  RS(32,16) m'=16 L=9216 hybrid_default  total_med=   16624 ns
+  RS(32,16) m'=16 L=9216 cm256           total_med=   57553 ns
+  RS(34,32) m'=1 L=1024 v3_scalar       total_med=   21451 ns
+  RS(34,32) m'=1 L=1024 ours_avx2       total_med=     991 ns
+  RS(34,32) m'=1 L=1024 ours_avx512     total_med=     773 ns
+  RS(34,32) m'=1 L=1024 isal_avx2       total_med=  161328 ns
+  RS(34,32) m'=1 L=1024 isal_avx512     total_med=  161585 ns
+  RS(34,32) m'=1 L=1024 isal_default    total_med=  160357 ns
+  RS(34,32) m'=1 L=1024 hybrid_avx2     total_med=    1449 ns
+  RS(34,32) m'=1 L=1024 hybrid_avx512   total_med=    1181 ns
+  RS(34,32) m'=1 L=1024 hybrid_default  total_med=     542 ns
+  RS(34,32) m'=1 L=1024 cm256           total_med=     545 ns
+  RS(34,32) m'=2 L=1024 v3_scalar       total_med=   40582 ns
+  RS(34,32) m'=2 L=1024 ours_avx2       total_med=    1587 ns
+  RS(34,32) m'=2 L=1024 ours_avx512     total_med=    1228 ns
+  RS(34,32) m'=2 L=1024 isal_avx2       total_med=  157861 ns
+  RS(34,32) m'=2 L=1024 isal_avx512     total_med=  157587 ns
+  RS(34,32) m'=2 L=1024 isal_default    total_med=  156758 ns
+  RS(34,32) m'=2 L=1024 hybrid_avx2     total_med=    2232 ns
+  RS(34,32) m'=2 L=1024 hybrid_avx512   total_med=    1878 ns
+  RS(34,32) m'=2 L=1024 hybrid_default  total_med=     812 ns
+  RS(34,32) m'=2 L=1024 cm256           total_med=    1311 ns
+  RS(34,32) m'=1 L=4096 v3_scalar       total_med=   72949 ns
+  RS(34,32) m'=1 L=4096 ours_avx2       total_med=    3073 ns
+  RS(34,32) m'=1 L=4096 ours_avx512     total_med=    2468 ns
+  RS(34,32) m'=1 L=4096 isal_avx2       total_med=  165566 ns
+  RS(34,32) m'=1 L=4096 isal_avx512     total_med=  164461 ns
+  RS(34,32) m'=1 L=4096 isal_default    total_med=  162188 ns
+  RS(34,32) m'=1 L=4096 hybrid_avx2     total_med=    4167 ns
+  RS(34,32) m'=1 L=4096 hybrid_avx512   total_med=    3028 ns
+  RS(34,32) m'=1 L=4096 hybrid_default  total_med=    1838 ns
+  RS(34,32) m'=1 L=4096 cm256           total_med=    1852 ns
+  RS(34,32) m'=2 L=4096 v3_scalar       total_med=  139477 ns
+  RS(34,32) m'=2 L=4096 ours_avx2       total_med=    5285 ns
+  RS(34,32) m'=2 L=4096 ours_avx512     total_med=    3440 ns
+  RS(34,32) m'=2 L=4096 isal_avx2       total_med=  163988 ns
+  RS(34,32) m'=2 L=4096 isal_avx512     total_med=  162549 ns
+  RS(34,32) m'=2 L=4096 isal_default    total_med=  158854 ns
+  RS(34,32) m'=2 L=4096 hybrid_avx2     total_med=    7259 ns
+  RS(34,32) m'=2 L=4096 hybrid_avx512   total_med=    5844 ns
+  RS(34,32) m'=2 L=4096 hybrid_default  total_med=    2047 ns
+  RS(34,32) m'=2 L=4096 cm256           total_med=    5291 ns
+  RS(34,32) m'=1 L=9216 v3_scalar       total_med=  158346 ns
+  RS(34,32) m'=1 L=9216 ours_avx2       total_med=    6429 ns
+  RS(34,32) m'=1 L=9216 ours_avx512     total_med=    5055 ns
+  RS(34,32) m'=1 L=9216 isal_avx2       total_med=  171288 ns
+  RS(34,32) m'=1 L=9216 isal_avx512     total_med=  169294 ns
+  RS(34,32) m'=1 L=9216 isal_default    total_med=  165725 ns
+  RS(34,32) m'=1 L=9216 hybrid_avx2     total_med=    9327 ns
+  RS(34,32) m'=1 L=9216 hybrid_avx512   total_med=    6103 ns
+  RS(34,32) m'=1 L=9216 hybrid_default  total_med=    3693 ns
+  RS(34,32) m'=1 L=9216 cm256           total_med=    5440 ns
+  RS(34,32) m'=2 L=9216 v3_scalar       total_med=  307449 ns
+  RS(34,32) m'=2 L=9216 ours_avx2       total_med=   11263 ns
+  RS(34,32) m'=2 L=9216 ours_avx512     total_med=    6977 ns
+  RS(34,32) m'=2 L=9216 isal_avx2       total_med=  171628 ns
+  RS(34,32) m'=2 L=9216 isal_avx512     total_med=  168737 ns
+  RS(34,32) m'=2 L=9216 isal_default    total_med=  161228 ns
+  RS(34,32) m'=2 L=9216 hybrid_avx2     total_med=   14819 ns
+  RS(34,32) m'=2 L=9216 hybrid_avx512   total_med=   12048 ns
+  RS(34,32) m'=2 L=9216 hybrid_default  total_med=    4001 ns
+  RS(34,32) m'=2 L=9216 cm256           total_med=   11396 ns
+  RS(36,32) m'=1 L=1024 v3_scalar       total_med=   21666 ns
+  RS(36,32) m'=1 L=1024 ours_avx2       total_med=     995 ns
+  RS(36,32) m'=1 L=1024 ours_avx512     total_med=     773 ns
+  RS(36,32) m'=1 L=1024 isal_avx2       total_med=  162730 ns
+  RS(36,32) m'=1 L=1024 isal_avx512     total_med=  162531 ns
+  RS(36,32) m'=1 L=1024 isal_default    total_med=  161716 ns
+  RS(36,32) m'=1 L=1024 hybrid_avx2     total_med=    1433 ns
+  RS(36,32) m'=1 L=1024 hybrid_avx512   total_med=    1181 ns
+  RS(36,32) m'=1 L=1024 hybrid_default  total_med=     557 ns
+  RS(36,32) m'=1 L=1024 cm256           total_med=     544 ns
+  RS(36,32) m'=2 L=1024 v3_scalar       total_med=   40294 ns
+  RS(36,32) m'=2 L=1024 ours_avx2       total_med=    1577 ns
+  RS(36,32) m'=2 L=1024 ours_avx512     total_med=    1225 ns
+  RS(36,32) m'=2 L=1024 isal_avx2       total_med=  157786 ns
+  RS(36,32) m'=2 L=1024 isal_avx512     total_med=  157951 ns
+  RS(36,32) m'=2 L=1024 isal_default    total_med=  156450 ns
+  RS(36,32) m'=2 L=1024 hybrid_avx2     total_med=    2301 ns
+  RS(36,32) m'=2 L=1024 hybrid_avx512   total_med=    2022 ns
+  RS(36,32) m'=2 L=1024 hybrid_default  total_med=     811 ns
+  RS(36,32) m'=2 L=1024 cm256           total_med=    1339 ns
+  RS(36,32) m'=4 L=1024 v3_scalar       total_med=   79751 ns
+  RS(36,32) m'=4 L=1024 ours_avx2       total_med=    3006 ns
+  RS(36,32) m'=4 L=1024 ours_avx512     total_med=    2262 ns
+  RS(36,32) m'=4 L=1024 isal_avx2       total_med=  156977 ns
+  RS(36,32) m'=4 L=1024 isal_avx512     total_med=  156850 ns
+  RS(36,32) m'=4 L=1024 isal_default    total_med=  154334 ns
+  RS(36,32) m'=4 L=1024 hybrid_avx2     total_med=    3975 ns
+  RS(36,32) m'=4 L=1024 hybrid_avx512   total_med=    3863 ns
+  RS(36,32) m'=4 L=1024 hybrid_default  total_med=    1585 ns
+  RS(36,32) m'=4 L=1024 cm256           total_med=    2824 ns
+  RS(36,32) m'=1 L=4096 v3_scalar       total_med=   72535 ns
+  RS(36,32) m'=1 L=4096 ours_avx2       total_med=    3085 ns
+  RS(36,32) m'=1 L=4096 ours_avx512     total_med=    2488 ns
+  RS(36,32) m'=1 L=4096 isal_avx2       total_med=  165094 ns
+  RS(36,32) m'=1 L=4096 isal_avx512     total_med=  164040 ns
+  RS(36,32) m'=1 L=4096 isal_default    total_med=  162208 ns
+  RS(36,32) m'=1 L=4096 hybrid_avx2     total_med=    4599 ns
+  RS(36,32) m'=1 L=4096 hybrid_avx512   total_med=    3026 ns
+  RS(36,32) m'=1 L=4096 hybrid_default  total_med=    1787 ns
+  RS(36,32) m'=1 L=4096 cm256           total_med=    2608 ns
+  RS(36,32) m'=2 L=4096 v3_scalar       total_med=  139091 ns
+  RS(36,32) m'=2 L=4096 ours_avx2       total_med=    5277 ns
+  RS(36,32) m'=2 L=4096 ours_avx512     total_med=    3435 ns
+  RS(36,32) m'=2 L=4096 isal_avx2       total_med=  162404 ns
+  RS(36,32) m'=2 L=4096 isal_avx512     total_med=  162502 ns
+  RS(36,32) m'=2 L=4096 isal_default    total_med=  158734 ns
+  RS(36,32) m'=2 L=4096 hybrid_avx2     total_med=    7246 ns
+  RS(36,32) m'=2 L=4096 hybrid_avx512   total_med=    5867 ns
+  RS(36,32) m'=2 L=4096 hybrid_default  total_med=    2051 ns
+  RS(36,32) m'=2 L=4096 cm256           total_med=    4256 ns
+  RS(36,32) m'=4 L=4096 v3_scalar       total_med=  275794 ns
+  RS(36,32) m'=4 L=4096 ours_avx2       total_med=    8900 ns
+  RS(36,32) m'=4 L=4096 ours_avx512     total_med=    5777 ns
+  RS(36,32) m'=4 L=4096 isal_avx2       total_med=  165197 ns
+  RS(36,32) m'=4 L=4096 isal_avx512     total_med=  163600 ns
+  RS(36,32) m'=4 L=4096 isal_default    total_med=  157562 ns
+  RS(36,32) m'=4 L=4096 hybrid_avx2     total_med=   11832 ns
+  RS(36,32) m'=4 L=4096 hybrid_avx512   total_med=   10305 ns
+  RS(36,32) m'=4 L=4096 hybrid_default  total_med=    3417 ns
+  RS(36,32) m'=4 L=4096 cm256           total_med=   10797 ns
+  RS(36,32) m'=1 L=9216 v3_scalar       total_med=  158602 ns
+  RS(36,32) m'=1 L=9216 ours_avx2       total_med=    6444 ns
+  RS(36,32) m'=1 L=9216 ours_avx512     total_med=    5054 ns
+  RS(36,32) m'=1 L=9216 isal_avx2       total_med=  169755 ns
+  RS(36,32) m'=1 L=9216 isal_avx512     total_med=  167865 ns
+  RS(36,32) m'=1 L=9216 isal_default    total_med=  165884 ns
+  RS(36,32) m'=1 L=9216 hybrid_avx2     total_med=    8344 ns
+  RS(36,32) m'=1 L=9216 hybrid_avx512   total_med=    6194 ns
+  RS(36,32) m'=1 L=9216 hybrid_default  total_med=    3678 ns
+  RS(36,32) m'=1 L=9216 cm256           total_med=    4025 ns
+  RS(36,32) m'=2 L=9216 v3_scalar       total_med=  305676 ns
+  RS(36,32) m'=2 L=9216 ours_avx2       total_med=   11213 ns
+  RS(36,32) m'=2 L=9216 ours_avx512     total_med=    6980 ns
+  RS(36,32) m'=2 L=9216 isal_avx2       total_med=  171377 ns
+  RS(36,32) m'=2 L=9216 isal_avx512     total_med=  168484 ns
+  RS(36,32) m'=2 L=9216 isal_default    total_med=  161202 ns
+  RS(36,32) m'=2 L=9216 hybrid_avx2     total_med=   14040 ns
+  RS(36,32) m'=2 L=9216 hybrid_avx512   total_med=   11898 ns
+  RS(36,32) m'=2 L=9216 hybrid_default  total_med=    3971 ns
+  RS(36,32) m'=2 L=9216 cm256           total_med=   12086 ns
+  RS(36,32) m'=4 L=9216 v3_scalar       total_med=  603553 ns
+  RS(36,32) m'=4 L=9216 ours_avx2       total_med=   18745 ns
+  RS(36,32) m'=4 L=9216 ours_avx512     total_med=   11513 ns
+  RS(36,32) m'=4 L=9216 isal_avx2       total_med=  178188 ns
+  RS(36,32) m'=4 L=9216 isal_avx512     total_med=  174799 ns
+  RS(36,32) m'=4 L=9216 isal_default    total_med=  161276 ns
+  RS(36,32) m'=4 L=9216 hybrid_avx2     total_med=   24170 ns
+  RS(36,32) m'=4 L=9216 hybrid_avx512   total_med=   21090 ns
+  RS(36,32) m'=4 L=9216 hybrid_default  total_med=    6508 ns
+  RS(36,32) m'=4 L=9216 cm256           total_med=   26543 ns
+>> [2/3] packet-size sweep (crossover)
+CPU: Intel(R) Xeon(R) Platinum 8488C | best ISA: avx512 | data: warm
+  RS(8,4) m'=1 L=256 cm256           total_med=      87 ns
+  RS(8,4) m'=1 L=256 hybrid_avx2     total_med=     262 ns
+  RS(8,4) m'=1 L=256 hybrid_avx512   total_med=     260 ns
+  RS(8,4) m'=1 L=256 hybrid_default  total_med=     112 ns
+  RS(8,4) m'=1 L=256 isal_avx2       total_med=     621 ns
+  RS(8,4) m'=1 L=256 isal_avx512     total_med=     625 ns
+  RS(8,4) m'=1 L=256 isal_default    total_med=     470 ns
+  RS(8,4) m'=1 L=256 ours_avx2       total_med=     145 ns
+  RS(8,4) m'=1 L=256 ours_avx512     total_med=     141 ns
+  RS(8,4) m'=2 L=256 cm256           total_med=     127 ns
+  RS(8,4) m'=2 L=256 hybrid_avx2     total_med=     335 ns
+  RS(8,4) m'=2 L=256 hybrid_avx512   total_med=     327 ns
+  RS(8,4) m'=2 L=256 hybrid_default  total_med=     146 ns
+  RS(8,4) m'=2 L=256 isal_avx2       total_med=     665 ns
+  RS(8,4) m'=2 L=256 isal_avx512     total_med=     666 ns
+  RS(8,4) m'=2 L=256 isal_default    total_med=     488 ns
+  RS(8,4) m'=2 L=256 ours_avx2       total_med=     214 ns
+  RS(8,4) m'=2 L=256 ours_avx512     total_med=     204 ns
+  RS(8,4) m'=1 L=512 cm256           total_med=      91 ns
+  RS(8,4) m'=1 L=512 hybrid_avx2     total_med=     286 ns
+  RS(8,4) m'=1 L=512 hybrid_avx512   total_med=     281 ns
+  RS(8,4) m'=1 L=512 hybrid_default  total_med=     120 ns
+  RS(8,4) m'=1 L=512 isal_avx2       total_med=     652 ns
+  RS(8,4) m'=1 L=512 isal_avx512     total_med=     647 ns
+  RS(8,4) m'=1 L=512 isal_default    total_med=     476 ns
+  RS(8,4) m'=1 L=512 ours_avx2       total_med=     166 ns
+  RS(8,4) m'=1 L=512 ours_avx512     total_med=     158 ns
+  RS(8,4) m'=2 L=512 cm256           total_med=     149 ns
+  RS(8,4) m'=2 L=512 hybrid_avx2     total_med=     373 ns
+  RS(8,4) m'=2 L=512 hybrid_avx512   total_med=     361 ns
+  RS(8,4) m'=2 L=512 hybrid_default  total_med=     157 ns
+  RS(8,4) m'=2 L=512 isal_avx2       total_med=     715 ns
+  RS(8,4) m'=2 L=512 isal_avx512     total_med=     705 ns
+  RS(8,4) m'=2 L=512 isal_default    total_med=     496 ns
+  RS(8,4) m'=2 L=512 ours_avx2       total_med=     246 ns
+  RS(8,4) m'=2 L=512 ours_avx512     total_med=     231 ns
+  RS(8,4) m'=1 L=1024 cm256           total_med=     102 ns
+  RS(8,4) m'=1 L=1024 hybrid_avx2     total_med=     342 ns
+  RS(8,4) m'=1 L=1024 hybrid_avx512   total_med=     318 ns
+  RS(8,4) m'=1 L=1024 hybrid_default  total_med=     145 ns
+  RS(8,4) m'=1 L=1024 isal_avx2       total_med=     703 ns
+  RS(8,4) m'=1 L=1024 isal_avx512     total_med=     682 ns
+  RS(8,4) m'=1 L=1024 isal_default    total_med=     502 ns
+  RS(8,4) m'=1 L=1024 ours_avx2       total_med=     207 ns
+  RS(8,4) m'=1 L=1024 ours_avx512     total_med=     190 ns
+  RS(8,4) m'=2 L=1024 cm256           total_med=     198 ns
+  RS(8,4) m'=2 L=1024 hybrid_avx2     total_med=     463 ns
+  RS(8,4) m'=2 L=1024 hybrid_avx512   total_med=     429 ns
+  RS(8,4) m'=2 L=1024 hybrid_default  total_med=     178 ns
+  RS(8,4) m'=2 L=1024 isal_avx2       total_med=     809 ns
+  RS(8,4) m'=2 L=1024 isal_avx512     total_med=     768 ns
+  RS(8,4) m'=2 L=1024 isal_default    total_med=     519 ns
+  RS(8,4) m'=2 L=1024 ours_avx2       total_med=     305 ns
+  RS(8,4) m'=2 L=1024 ours_avx512     total_med=     279 ns
+  RS(8,4) m'=1 L=2048 cm256           total_med=     155 ns
+  RS(8,4) m'=1 L=2048 hybrid_avx2     total_med=     444 ns
+  RS(8,4) m'=1 L=2048 hybrid_avx512   total_med=     397 ns
+  RS(8,4) m'=1 L=2048 hybrid_default  total_med=     209 ns
+  RS(8,4) m'=1 L=2048 isal_avx2       total_med=     808 ns
+  RS(8,4) m'=1 L=2048 isal_avx512     total_med=     762 ns
+  RS(8,4) m'=1 L=2048 isal_default    total_med=     563 ns
+  RS(8,4) m'=1 L=2048 ours_avx2       total_med=     287 ns
+  RS(8,4) m'=1 L=2048 ours_avx512     total_med=     255 ns
+  RS(8,4) m'=2 L=2048 cm256           total_med=     302 ns
+  RS(8,4) m'=2 L=2048 hybrid_avx2     total_med=     682 ns
+  RS(8,4) m'=2 L=2048 hybrid_avx512   total_med=     623 ns
+  RS(8,4) m'=2 L=2048 hybrid_default  total_med=     238 ns
+  RS(8,4) m'=2 L=2048 isal_avx2       total_med=    1043 ns
+  RS(8,4) m'=2 L=2048 isal_avx512     total_med=     982 ns
+  RS(8,4) m'=2 L=2048 isal_default    total_med=     571 ns
+  RS(8,4) m'=2 L=2048 ours_avx2       total_med=     441 ns
+  RS(8,4) m'=2 L=2048 ours_avx512     total_med=     383 ns
+  RS(8,4) m'=1 L=4096 cm256           total_med=     198 ns
+  RS(8,4) m'=1 L=4096 hybrid_avx2     total_med=     748 ns
+  RS(8,4) m'=1 L=4096 hybrid_avx512   total_med=     717 ns
+  RS(8,4) m'=1 L=4096 hybrid_default  total_med=     338 ns
+  RS(8,4) m'=1 L=4096 isal_avx2       total_med=    1080 ns
+  RS(8,4) m'=1 L=4096 isal_avx512     total_med=    1035 ns
+  RS(8,4) m'=1 L=4096 isal_default    total_med=     646 ns
+  RS(8,4) m'=1 L=4096 ours_avx2       total_med=     487 ns
+  RS(8,4) m'=1 L=4096 ours_avx512     total_med=     391 ns
+  RS(8,4) m'=2 L=4096 cm256           total_med=     579 ns
+  RS(8,4) m'=2 L=4096 hybrid_avx2     total_med=    1033 ns
+  RS(8,4) m'=2 L=4096 hybrid_avx512   total_med=     870 ns
+  RS(8,4) m'=2 L=4096 hybrid_default  total_med=     346 ns
+  RS(8,4) m'=2 L=4096 isal_avx2       total_med=    1386 ns
+  RS(8,4) m'=2 L=4096 isal_avx512     total_med=    1224 ns
+  RS(8,4) m'=2 L=4096 isal_default    total_med=     705 ns
+  RS(8,4) m'=2 L=4096 ours_avx2       total_med=     730 ns
+  RS(8,4) m'=2 L=4096 ours_avx512     total_med=     640 ns
+  RS(8,4) m'=1 L=8192 cm256           total_med=     368 ns
+  RS(8,4) m'=1 L=8192 hybrid_avx2     total_med=    1263 ns
+  RS(8,4) m'=1 L=8192 hybrid_avx512   total_med=    1116 ns
+  RS(8,4) m'=1 L=8192 hybrid_default  total_med=     580 ns
+  RS(8,4) m'=1 L=8192 isal_avx2       total_med=    1560 ns
+  RS(8,4) m'=1 L=8192 isal_avx512     total_med=    1353 ns
+  RS(8,4) m'=1 L=8192 isal_default    total_med=     935 ns
+  RS(8,4) m'=1 L=8192 ours_avx2       total_med=     861 ns
+  RS(8,4) m'=1 L=8192 ours_avx512     total_med=     799 ns
+  RS(8,4) m'=2 L=8192 cm256           total_med=    1108 ns
+  RS(8,4) m'=2 L=8192 hybrid_avx2     total_med=    1905 ns
+  RS(8,4) m'=2 L=8192 hybrid_avx512   total_med=    1492 ns
+  RS(8,4) m'=2 L=8192 hybrid_default  total_med=     625 ns
+  RS(8,4) m'=2 L=8192 isal_avx2       total_med=    2184 ns
+  RS(8,4) m'=2 L=8192 isal_avx512     total_med=    1894 ns
+  RS(8,4) m'=2 L=8192 isal_default    total_med=     958 ns
+  RS(8,4) m'=2 L=8192 ours_avx2       total_med=    1351 ns
+  RS(8,4) m'=2 L=8192 ours_avx512     total_med=     989 ns
+  RS(8,4) m'=1 L=9216 cm256           total_med=     418 ns
+  RS(8,4) m'=1 L=9216 hybrid_avx2     total_med=    1339 ns
+  RS(8,4) m'=1 L=9216 hybrid_avx512   total_med=    1053 ns
+  RS(8,4) m'=1 L=9216 hybrid_default  total_med=     648 ns
+  RS(8,4) m'=1 L=9216 isal_avx2       total_med=    1682 ns
+  RS(8,4) m'=1 L=9216 isal_avx512     total_med=    1430 ns
+  RS(8,4) m'=1 L=9216 isal_default    total_med=    1010 ns
+  RS(8,4) m'=1 L=9216 ours_avx2       total_med=     974 ns
+  RS(8,4) m'=1 L=9216 ours_avx512     total_med=     869 ns
+  RS(8,4) m'=2 L=9216 cm256           total_med=    1247 ns
+  RS(8,4) m'=2 L=9216 hybrid_avx2     total_med=    2004 ns
+  RS(8,4) m'=2 L=9216 hybrid_avx512   total_med=    1699 ns
+  RS(8,4) m'=2 L=9216 hybrid_default  total_med=     729 ns
+  RS(8,4) m'=2 L=9216 isal_avx2       total_med=    2410 ns
+  RS(8,4) m'=2 L=9216 isal_avx512     total_med=    2059 ns
+  RS(8,4) m'=2 L=9216 isal_default    total_med=    1054 ns
+  RS(8,4) m'=2 L=9216 ours_avx2       total_med=    1542 ns
+  RS(8,4) m'=2 L=9216 ours_avx512     total_med=    1093 ns
+  RS(8,4) m'=1 L=16384 cm256           total_med=     996 ns
+  RS(8,4) m'=1 L=16384 hybrid_avx2     total_med=    2270 ns
+  RS(8,4) m'=1 L=16384 hybrid_avx512   total_med=    1819 ns
+  RS(8,4) m'=1 L=16384 hybrid_default  total_med=    1073 ns
+  RS(8,4) m'=1 L=16384 isal_avx2       total_med=    2581 ns
+  RS(8,4) m'=1 L=16384 isal_avx512     total_med=    2190 ns
+  RS(8,4) m'=1 L=16384 isal_default    total_med=    1429 ns
+  RS(8,4) m'=1 L=16384 ours_avx2       total_med=    1801 ns
+  RS(8,4) m'=1 L=16384 ours_avx512     total_med=    1296 ns
+  RS(8,4) m'=2 L=16384 cm256           total_med=    2387 ns
+  RS(8,4) m'=2 L=16384 hybrid_avx2     total_med=    3373 ns
+  RS(8,4) m'=2 L=16384 hybrid_avx512   total_med=    2933 ns
+  RS(8,4) m'=2 L=16384 hybrid_default  total_med=    1446 ns
+  RS(8,4) m'=2 L=16384 isal_avx2       total_med=    3871 ns
+  RS(8,4) m'=2 L=16384 isal_avx512     total_med=    3236 ns
+  RS(8,4) m'=2 L=16384 isal_default    total_med=    1793 ns
+  RS(8,4) m'=2 L=16384 ours_avx2       total_med=    2697 ns
+  RS(8,4) m'=2 L=16384 ours_avx512     total_med=    1829 ns
+  RS(8,4) m'=1 L=32768 cm256           total_med=    1925 ns
+  RS(8,4) m'=1 L=32768 hybrid_avx2     total_med=    4250 ns
+  RS(8,4) m'=1 L=32768 hybrid_avx512   total_med=    3369 ns
+  RS(8,4) m'=1 L=32768 hybrid_default  total_med=    2016 ns
+  RS(8,4) m'=1 L=32768 isal_avx2       total_med=    4585 ns
+  RS(8,4) m'=1 L=32768 isal_avx512     total_med=    3789 ns
+  RS(8,4) m'=1 L=32768 isal_default    total_med=    2126 ns
+  RS(8,4) m'=1 L=32768 ours_avx2       total_med=    3478 ns
+  RS(8,4) m'=1 L=32768 ours_avx512     total_med=    2434 ns
+  RS(8,4) m'=2 L=32768 cm256           total_med=    5034 ns
+  RS(8,4) m'=2 L=32768 hybrid_avx2     total_med=    6334 ns
+  RS(8,4) m'=2 L=32768 hybrid_avx512   total_med=    5412 ns
+  RS(8,4) m'=2 L=32768 hybrid_default  total_med=    2516 ns
+  RS(8,4) m'=2 L=32768 isal_avx2       total_med=    6997 ns
+  RS(8,4) m'=2 L=32768 isal_avx512     total_med=    5739 ns
+  RS(8,4) m'=2 L=32768 isal_default    total_med=    2793 ns
+  RS(8,4) m'=2 L=32768 ours_avx2       total_med=    5156 ns
+  RS(8,4) m'=2 L=32768 ours_avx512     total_med=    3511 ns
+  RS(8,4) m'=1 L=65536 cm256           total_med=    4505 ns
+  RS(8,4) m'=1 L=65536 hybrid_avx2     total_med=    8158 ns
+  RS(8,4) m'=1 L=65536 hybrid_avx512   total_med=    5372 ns
+  RS(8,4) m'=1 L=65536 hybrid_default  total_med=    3469 ns
+  RS(8,4) m'=1 L=65536 isal_avx2       total_med=    8411 ns
+  RS(8,4) m'=1 L=65536 isal_avx512     total_med=    6688 ns
+  RS(8,4) m'=1 L=65536 isal_default    total_med=    3694 ns
+  RS(8,4) m'=1 L=65536 ours_avx2       total_med=    6615 ns
+  RS(8,4) m'=1 L=65536 ours_avx512     total_med=    4629 ns
+  RS(8,4) m'=2 L=65536 cm256           total_med=   10669 ns
+  RS(8,4) m'=2 L=65536 hybrid_avx2     total_med=   12798 ns
+  RS(8,4) m'=2 L=65536 hybrid_avx512   total_med=   10406 ns
+  RS(8,4) m'=2 L=65536 hybrid_default  total_med=    7634 ns
+  RS(8,4) m'=2 L=65536 isal_avx2       total_med=   13136 ns
+  RS(8,4) m'=2 L=65536 isal_avx512     total_med=   10676 ns
+  RS(8,4) m'=2 L=65536 isal_default    total_med=    7997 ns
+  RS(8,4) m'=2 L=65536 ours_avx2       total_med=    9848 ns
+  RS(8,4) m'=2 L=65536 ours_avx512     total_med=    6984 ns
+  RS(18,16) m'=1 L=256 cm256           total_med=     172 ns
+  RS(18,16) m'=1 L=256 hybrid_avx2     total_med=     503 ns
+  RS(18,16) m'=1 L=256 hybrid_avx512   total_med=     545 ns
+  RS(18,16) m'=1 L=256 hybrid_default  total_med=     190 ns
+  RS(18,16) m'=1 L=256 isal_avx2       total_med=   20510 ns
+  RS(18,16) m'=1 L=256 isal_avx512     total_med=   20378 ns
+  RS(18,16) m'=1 L=256 isal_default    total_med=   19980 ns
+  RS(18,16) m'=1 L=256 ours_avx2       total_med=     269 ns
+  RS(18,16) m'=1 L=256 ours_avx512     total_med=     251 ns
+  RS(18,16) m'=2 L=256 cm256           total_med=     321 ns
+  RS(18,16) m'=2 L=256 hybrid_avx2     total_med=     674 ns
+  RS(18,16) m'=2 L=256 hybrid_avx512   total_med=     637 ns
+  RS(18,16) m'=2 L=256 hybrid_default  total_med=     283 ns
+  RS(18,16) m'=2 L=256 isal_avx2       total_med=   20233 ns
+  RS(18,16) m'=2 L=256 isal_avx512     total_med=   20479 ns
+  RS(18,16) m'=2 L=256 isal_default    total_med=   20009 ns
+  RS(18,16) m'=2 L=256 ours_avx2       total_med=     426 ns
+  RS(18,16) m'=2 L=256 ours_avx512     total_med=     395 ns
+  RS(18,16) m'=1 L=512 cm256           total_med=     204 ns
+  RS(18,16) m'=1 L=512 hybrid_avx2     total_med=     539 ns
+  RS(18,16) m'=1 L=512 hybrid_avx512   total_med=     493 ns
+  RS(18,16) m'=1 L=512 hybrid_default  total_med=     225 ns
+  RS(18,16) m'=1 L=512 isal_avx2       total_med=   20607 ns
+  RS(18,16) m'=1 L=512 isal_avx512     total_med=   20554 ns
+  RS(18,16) m'=1 L=512 isal_default    total_med=   20233 ns
+  RS(18,16) m'=1 L=512 ours_avx2       total_med=     348 ns
+  RS(18,16) m'=1 L=512 ours_avx512     total_med=     317 ns
+  RS(18,16) m'=2 L=512 cm256           total_med=     409 ns
+  RS(18,16) m'=2 L=512 hybrid_avx2     total_med=     853 ns
+  RS(18,16) m'=2 L=512 hybrid_avx512   total_med=     779 ns
+  RS(18,16) m'=2 L=512 hybrid_default  total_med=     322 ns
+  RS(18,16) m'=2 L=512 isal_avx2       total_med=   20593 ns
+  RS(18,16) m'=2 L=512 isal_avx512     total_med=   20628 ns
+  RS(18,16) m'=2 L=512 isal_default    total_med=   20045 ns
+  RS(18,16) m'=2 L=512 ours_avx2       total_med=     550 ns
+  RS(18,16) m'=2 L=512 ours_avx512     total_med=     481 ns
+  RS(18,16) m'=1 L=1024 cm256           total_med=     256 ns
+  RS(18,16) m'=1 L=1024 hybrid_avx2     total_med=     797 ns
+  RS(18,16) m'=1 L=1024 hybrid_avx512   total_med=     705 ns
+  RS(18,16) m'=1 L=1024 hybrid_default  total_med=     304 ns
+  RS(18,16) m'=1 L=1024 isal_avx2       total_med=   20663 ns
+  RS(18,16) m'=1 L=1024 isal_avx512     total_med=   20565 ns
+  RS(18,16) m'=1 L=1024 isal_default    total_med=   20094 ns
+  RS(18,16) m'=1 L=1024 ours_avx2       total_med=     551 ns
+  RS(18,16) m'=1 L=1024 ours_avx512     total_med=     444 ns
+  RS(18,16) m'=2 L=1024 cm256           total_med=     652 ns
+  RS(18,16) m'=2 L=1024 hybrid_avx2     total_med=    1274 ns
+  RS(18,16) m'=2 L=1024 hybrid_avx512   total_med=    1194 ns
+  RS(18,16) m'=2 L=1024 hybrid_default  total_med=     415 ns
+  RS(18,16) m'=2 L=1024 isal_avx2       total_med=   20974 ns
+  RS(18,16) m'=2 L=1024 isal_avx512     total_med=   20982 ns
+  RS(18,16) m'=2 L=1024 isal_default    total_med=   20203 ns
+  RS(18,16) m'=2 L=1024 ours_avx2       total_med=     838 ns
+  RS(18,16) m'=2 L=1024 ours_avx512     total_med=     724 ns
+  RS(18,16) m'=1 L=2048 cm256           total_med=     440 ns
+  RS(18,16) m'=1 L=2048 hybrid_avx2     total_med=    1355 ns
+  RS(18,16) m'=1 L=2048 hybrid_avx512   total_med=    1059 ns
+  RS(18,16) m'=1 L=2048 hybrid_default  total_med=     504 ns
+  RS(18,16) m'=1 L=2048 isal_avx2       total_med=   21191 ns
+  RS(18,16) m'=1 L=2048 isal_avx512     total_med=   21006 ns
+  RS(18,16) m'=1 L=2048 isal_default    total_med=   20476 ns
+  RS(18,16) m'=1 L=2048 ours_avx2       total_med=     912 ns
+  RS(18,16) m'=1 L=2048 ours_avx512     total_med=     703 ns
+  RS(18,16) m'=2 L=2048 cm256           total_med=    1137 ns
+  RS(18,16) m'=2 L=2048 hybrid_avx2     total_med=    1940 ns
+  RS(18,16) m'=2 L=2048 hybrid_avx512   total_med=    1653 ns
+  RS(18,16) m'=2 L=2048 hybrid_default  total_med=     701 ns
+  RS(18,16) m'=2 L=2048 isal_avx2       total_med=   21986 ns
+  RS(18,16) m'=2 L=2048 isal_avx512     total_med=   21702 ns
+  RS(18,16) m'=2 L=2048 isal_default    total_med=   20026 ns
+  RS(18,16) m'=2 L=2048 ours_avx2       total_med=    1396 ns
+  RS(18,16) m'=2 L=2048 ours_avx512     total_med=    1057 ns
+  RS(18,16) m'=1 L=4096 cm256           total_med=     882 ns
+  RS(18,16) m'=1 L=4096 hybrid_avx2     total_med=    2191 ns
+  RS(18,16) m'=1 L=4096 hybrid_avx512   total_med=    1749 ns
+  RS(18,16) m'=1 L=4096 hybrid_default  total_med=     863 ns
+  RS(18,16) m'=1 L=4096 isal_avx2       total_med=   22813 ns
+  RS(18,16) m'=1 L=4096 isal_avx512     total_med=   22313 ns
+  RS(18,16) m'=1 L=4096 isal_default    total_med=   20950 ns
+  RS(18,16) m'=1 L=4096 ours_avx2       total_med=    1833 ns
+  RS(18,16) m'=1 L=4096 ours_avx512     total_med=    1287 ns
+  RS(18,16) m'=2 L=4096 cm256           total_med=    2108 ns
+  RS(18,16) m'=2 L=4096 hybrid_avx2     total_med=    3785 ns
+  RS(18,16) m'=2 L=4096 hybrid_avx512   total_med=    2992 ns
+  RS(18,16) m'=2 L=4096 hybrid_default  total_med=    1047 ns
+  RS(18,16) m'=2 L=4096 isal_avx2       total_med=   23820 ns
+  RS(18,16) m'=2 L=4096 isal_avx512     total_med=   22994 ns
+  RS(18,16) m'=2 L=4096 isal_default    total_med=   20713 ns
+  RS(18,16) m'=2 L=4096 ours_avx2       total_med=    2751 ns
+  RS(18,16) m'=2 L=4096 ours_avx512     total_med=    1822 ns
+  RS(18,16) m'=1 L=8192 cm256           total_med=    1672 ns
+  RS(18,16) m'=1 L=8192 hybrid_avx2     total_med=    3980 ns
+  RS(18,16) m'=1 L=8192 hybrid_avx512   total_med=    3020 ns
+  RS(18,16) m'=1 L=8192 hybrid_default  total_med=    1768 ns
+  RS(18,16) m'=1 L=8192 isal_avx2       total_med=   25260 ns
+  RS(18,16) m'=1 L=8192 isal_avx512     total_med=   24066 ns
+  RS(18,16) m'=1 L=8192 isal_default    total_med=   21975 ns
+  RS(18,16) m'=1 L=8192 ours_avx2       total_med=    2993 ns
+  RS(18,16) m'=1 L=8192 ours_avx512     total_med=    2416 ns
+  RS(18,16) m'=2 L=8192 cm256           total_med=    4109 ns
+  RS(18,16) m'=2 L=8192 hybrid_avx2     total_med=    6590 ns
+  RS(18,16) m'=2 L=8192 hybrid_avx512   total_med=    5546 ns
+  RS(18,16) m'=2 L=8192 hybrid_default  total_med=    1904 ns
+  RS(18,16) m'=2 L=8192 isal_avx2       total_med=   27623 ns
+  RS(18,16) m'=2 L=8192 isal_avx512     total_med=   25715 ns
+  RS(18,16) m'=2 L=8192 isal_default    total_med=   21921 ns
+  RS(18,16) m'=2 L=8192 ours_avx2       total_med=    5158 ns
+  RS(18,16) m'=2 L=8192 ours_avx512     total_med=    3344 ns
+  RS(18,16) m'=1 L=9216 cm256           total_med=    2673 ns
+  RS(18,16) m'=1 L=9216 hybrid_avx2     total_med=    4861 ns
+  RS(18,16) m'=1 L=9216 hybrid_avx512   total_med=    3312 ns
+  RS(18,16) m'=1 L=9216 hybrid_default  total_med=    1975 ns
+  RS(18,16) m'=1 L=9216 isal_avx2       total_med=   25711 ns
+  RS(18,16) m'=1 L=9216 isal_avx512     total_med=   24544 ns
+  RS(18,16) m'=1 L=9216 isal_default    total_med=   21928 ns
+  RS(18,16) m'=1 L=9216 ours_avx2       total_med=    3299 ns
+  RS(18,16) m'=1 L=9216 ours_avx512     total_med=    2674 ns
+  RS(18,16) m'=2 L=9216 cm256           total_med=    5846 ns
+  RS(18,16) m'=2 L=9216 hybrid_avx2     total_med=    7631 ns
+  RS(18,16) m'=2 L=9216 hybrid_avx512   total_med=    5580 ns
+  RS(18,16) m'=2 L=9216 hybrid_default  total_med=    2064 ns
+  RS(18,16) m'=2 L=9216 isal_avx2       total_med=   28257 ns
+  RS(18,16) m'=2 L=9216 isal_avx512     total_med=   26580 ns
+  RS(18,16) m'=2 L=9216 isal_default    total_med=   22128 ns
+  RS(18,16) m'=2 L=9216 ours_avx2       total_med=    5699 ns
+  RS(18,16) m'=2 L=9216 ours_avx512     total_med=    3698 ns
+  RS(18,16) m'=1 L=16384 cm256           total_med=    4728 ns
+  RS(18,16) m'=1 L=16384 hybrid_avx2     total_med=    8409 ns
+  RS(18,16) m'=1 L=16384 hybrid_avx512   total_med=    5471 ns
+  RS(18,16) m'=1 L=16384 hybrid_default  total_med=    3406 ns
+  RS(18,16) m'=1 L=16384 isal_avx2       total_med=   28771 ns
+  RS(18,16) m'=1 L=16384 isal_avx512     total_med=   26920 ns
+  RS(18,16) m'=1 L=16384 isal_default    total_med=   23921 ns
+  RS(18,16) m'=1 L=16384 ours_avx2       total_med=    5838 ns
+  RS(18,16) m'=1 L=16384 ours_avx512     total_med=    4603 ns
+  RS(18,16) m'=2 L=16384 cm256           total_med=   10726 ns
+  RS(18,16) m'=2 L=16384 hybrid_avx2     total_med=   12917 ns
+  RS(18,16) m'=2 L=16384 hybrid_avx512   total_med=   10494 ns
+  RS(18,16) m'=2 L=16384 hybrid_default  total_med=    3541 ns
+  RS(18,16) m'=2 L=16384 isal_avx2       total_med=   33099 ns
+  RS(18,16) m'=2 L=16384 isal_avx512     total_med=   30275 ns
+  RS(18,16) m'=2 L=16384 isal_default    total_med=   23805 ns
+  RS(18,16) m'=2 L=16384 ours_avx2       total_med=    9949 ns
+  RS(18,16) m'=2 L=16384 ours_avx512     total_med=    6314 ns
+  RS(18,16) m'=1 L=32768 cm256           total_med=    9577 ns
+  RS(18,16) m'=1 L=32768 hybrid_avx2     total_med=   17800 ns
+  RS(18,16) m'=1 L=32768 hybrid_avx512   total_med=   10645 ns
+  RS(18,16) m'=1 L=32768 hybrid_default  total_med=    7172 ns
+  RS(18,16) m'=1 L=32768 isal_avx2       total_med=   37805 ns
+  RS(18,16) m'=1 L=32768 isal_avx512     total_med=   30370 ns
+  RS(18,16) m'=1 L=32768 isal_default    total_med=   26968 ns
+  RS(18,16) m'=1 L=32768 ours_avx2       total_med=   13854 ns
+  RS(18,16) m'=1 L=32768 ours_avx512     total_med=    9302 ns
+  RS(18,16) m'=2 L=32768 cm256           total_med=   23881 ns
+  RS(18,16) m'=2 L=32768 hybrid_avx2     total_med=   27130 ns
+  RS(18,16) m'=2 L=32768 hybrid_avx512   total_med=   18127 ns
+  RS(18,16) m'=2 L=32768 hybrid_default  total_med=    7159 ns
+  RS(18,16) m'=2 L=32768 isal_avx2       total_med=   46743 ns
+  RS(18,16) m'=2 L=32768 isal_avx512     total_med=   37751 ns
+  RS(18,16) m'=2 L=32768 isal_default    total_med=   26907 ns
+  RS(18,16) m'=2 L=32768 ours_avx2       total_med=   20934 ns
+  RS(18,16) m'=2 L=32768 ours_avx512     total_med=   12732 ns
+  RS(18,16) m'=1 L=65536 cm256           total_med=   21988 ns
+  RS(18,16) m'=1 L=65536 hybrid_avx2     total_med=   36608 ns
+  RS(18,16) m'=1 L=65536 hybrid_avx512   total_med=   20659 ns
+  RS(18,16) m'=1 L=65536 hybrid_default  total_med=   13934 ns
+  RS(18,16) m'=1 L=65536 isal_avx2       total_med=   57460 ns
+  RS(18,16) m'=1 L=65536 isal_avx512     total_med=   41570 ns
+  RS(18,16) m'=1 L=65536 isal_default    total_med=   34782 ns
+  RS(18,16) m'=1 L=65536 ours_avx2       total_med=   30750 ns
+  RS(18,16) m'=1 L=65536 ours_avx512     total_med=   19229 ns
+  RS(18,16) m'=2 L=65536 cm256           total_med=   47302 ns
+  RS(18,16) m'=2 L=65536 hybrid_avx2     total_med=   52414 ns
+  RS(18,16) m'=2 L=65536 hybrid_avx512   total_med=   36264 ns
+  RS(18,16) m'=2 L=65536 hybrid_default  total_med=   15760 ns
+  RS(18,16) m'=2 L=65536 isal_avx2       total_med=   74787 ns
+  RS(18,16) m'=2 L=65536 isal_avx512     total_med=   55915 ns
+  RS(18,16) m'=2 L=65536 isal_default    total_med=   35438 ns
+  RS(18,16) m'=2 L=65536 ours_avx2       total_med=   43544 ns
+  RS(18,16) m'=2 L=65536 ours_avx512     total_med=   26207 ns
+  RS(32,16) m'=1 L=256 cm256           total_med=     168 ns
+  RS(32,16) m'=1 L=256 hybrid_avx2     total_med=     435 ns
+  RS(32,16) m'=1 L=256 hybrid_avx512   total_med=     419 ns
+  RS(32,16) m'=1 L=256 hybrid_default  total_med=     193 ns
+  RS(32,16) m'=1 L=256 isal_avx2       total_med=   20524 ns
+  RS(32,16) m'=1 L=256 isal_avx512     total_med=   20582 ns
+  RS(32,16) m'=1 L=256 isal_default    total_med=   20219 ns
+  RS(32,16) m'=1 L=256 ours_avx2       total_med=     270 ns
+  RS(32,16) m'=1 L=256 ours_avx512     total_med=     255 ns
+  RS(32,16) m'=2 L=256 cm256           total_med=     321 ns
+  RS(32,16) m'=2 L=256 hybrid_avx2     total_med=     671 ns
+  RS(32,16) m'=2 L=256 hybrid_avx512   total_med=     628 ns
+  RS(32,16) m'=2 L=256 hybrid_default  total_med=     284 ns
+  RS(32,16) m'=2 L=256 isal_avx2       total_med=   20422 ns
+  RS(32,16) m'=2 L=256 isal_avx512     total_med=   20320 ns
+  RS(32,16) m'=2 L=256 isal_default    total_med=   19840 ns
+  RS(32,16) m'=2 L=256 ours_avx2       total_med=     428 ns
+  RS(32,16) m'=2 L=256 ours_avx512     total_med=     396 ns
+  RS(32,16) m'=1 L=512 cm256           total_med=     206 ns
+  RS(32,16) m'=1 L=512 hybrid_avx2     total_med=     543 ns
+  RS(32,16) m'=1 L=512 hybrid_avx512   total_med=     500 ns
+  RS(32,16) m'=1 L=512 hybrid_default  total_med=     230 ns
+  RS(32,16) m'=1 L=512 isal_avx2       total_med=   20421 ns
+  RS(32,16) m'=1 L=512 isal_avx512     total_med=   20688 ns
+  RS(32,16) m'=1 L=512 isal_default    total_med=   20305 ns
+  RS(32,16) m'=1 L=512 ours_avx2       total_med=     352 ns
+  RS(32,16) m'=1 L=512 ours_avx512     total_med=     317 ns
+  RS(32,16) m'=2 L=512 cm256           total_med=     413 ns
+  RS(32,16) m'=2 L=512 hybrid_avx2     total_med=     869 ns
+  RS(32,16) m'=2 L=512 hybrid_avx512   total_med=     811 ns
+  RS(32,16) m'=2 L=512 hybrid_default  total_med=     334 ns
+  RS(32,16) m'=2 L=512 isal_avx2       total_med=   20665 ns
+  RS(32,16) m'=2 L=512 isal_avx512     total_med=   20680 ns
+  RS(32,16) m'=2 L=512 isal_default    total_med=   20102 ns
+  RS(32,16) m'=2 L=512 ours_avx2       total_med=     560 ns
+  RS(32,16) m'=2 L=512 ours_avx512     total_med=     488 ns
+  RS(32,16) m'=1 L=1024 cm256           total_med=     423 ns
+  RS(32,16) m'=1 L=1024 hybrid_avx2     total_med=     798 ns
+  RS(32,16) m'=1 L=1024 hybrid_avx512   total_med=     710 ns
+  RS(32,16) m'=1 L=1024 hybrid_default  total_med=     310 ns
+  RS(32,16) m'=1 L=1024 isal_avx2       total_med=   20728 ns
+  RS(32,16) m'=1 L=1024 isal_avx512     total_med=   20622 ns
+  RS(32,16) m'=1 L=1024 isal_default    total_med=   20083 ns
+  RS(32,16) m'=1 L=1024 ours_avx2       total_med=     590 ns
+  RS(32,16) m'=1 L=1024 ours_avx512     total_med=     520 ns
+  RS(32,16) m'=2 L=1024 cm256           total_med=     684 ns
+  RS(32,16) m'=2 L=1024 hybrid_avx2     total_med=    1276 ns
+  RS(32,16) m'=2 L=1024 hybrid_avx512   total_med=    1063 ns
+  RS(32,16) m'=2 L=1024 hybrid_default  total_med=     423 ns
+  RS(32,16) m'=2 L=1024 isal_avx2       total_med=   20764 ns
+  RS(32,16) m'=2 L=1024 isal_avx512     total_med=   20834 ns
+  RS(32,16) m'=2 L=1024 isal_default    total_med=   20206 ns
+  RS(32,16) m'=2 L=1024 ours_avx2       total_med=     845 ns
+  RS(32,16) m'=2 L=1024 ours_avx512     total_med=     737 ns
+  RS(32,16) m'=1 L=2048 cm256           total_med=     491 ns
+  RS(32,16) m'=1 L=2048 hybrid_avx2     total_med=    1365 ns
+  RS(32,16) m'=1 L=2048 hybrid_avx512   total_med=    1097 ns
+  RS(32,16) m'=1 L=2048 hybrid_default  total_med=     508 ns
+  RS(32,16) m'=1 L=2048 isal_avx2       total_med=   21464 ns
+  RS(32,16) m'=1 L=2048 isal_avx512     total_med=   21032 ns
+  RS(32,16) m'=1 L=2048 isal_default    total_med=   20281 ns
+  RS(32,16) m'=1 L=2048 ours_avx2       total_med=     929 ns
+  RS(32,16) m'=1 L=2048 ours_avx512     total_med=     844 ns
+  RS(32,16) m'=2 L=2048 cm256           total_med=    1155 ns
+  RS(32,16) m'=2 L=2048 hybrid_avx2     total_med=    2130 ns
+  RS(32,16) m'=2 L=2048 hybrid_avx512   total_med=    1820 ns
+  RS(32,16) m'=2 L=2048 hybrid_default  total_med=     745 ns
+  RS(32,16) m'=2 L=2048 isal_avx2       total_med=   21920 ns
+  RS(32,16) m'=2 L=2048 isal_avx512     total_med=   21381 ns
+  RS(32,16) m'=2 L=2048 isal_default    total_med=   20132 ns
+  RS(32,16) m'=2 L=2048 ours_avx2       total_med=    1414 ns
+  RS(32,16) m'=2 L=2048 ours_avx512     total_med=    1219 ns
+  RS(32,16) m'=1 L=4096 cm256           total_med=    1290 ns
+  RS(32,16) m'=1 L=4096 hybrid_avx2     total_med=    2413 ns
+  RS(32,16) m'=1 L=4096 hybrid_avx512   total_med=    1939 ns
+  RS(32,16) m'=1 L=4096 hybrid_default  total_med=     958 ns
+  RS(32,16) m'=1 L=4096 isal_avx2       total_med=   22637 ns
+  RS(32,16) m'=1 L=4096 isal_avx512     total_med=   22130 ns
+  RS(32,16) m'=1 L=4096 isal_default    total_med=   20725 ns
+  RS(32,16) m'=1 L=4096 ours_avx2       total_med=    1866 ns
+  RS(32,16) m'=1 L=4096 ours_avx512     total_med=    1311 ns
+  RS(32,16) m'=2 L=4096 cm256           total_med=    2637 ns
+  RS(32,16) m'=2 L=4096 hybrid_avx2     total_med=    3638 ns
+  RS(32,16) m'=2 L=4096 hybrid_avx512   total_med=    3125 ns
+  RS(32,16) m'=2 L=4096 hybrid_default  total_med=    1249 ns
+  RS(32,16) m'=2 L=4096 isal_avx2       total_med=   23723 ns
+  RS(32,16) m'=2 L=4096 isal_avx512     total_med=   22855 ns
+  RS(32,16) m'=2 L=4096 isal_default    total_med=   20728 ns
+  RS(32,16) m'=2 L=4096 ours_avx2       total_med=    2779 ns
+  RS(32,16) m'=2 L=4096 ours_avx512     total_med=    1827 ns
+  RS(32,16) m'=1 L=8192 cm256           total_med=    1982 ns
+  RS(32,16) m'=1 L=8192 hybrid_avx2     total_med=    4680 ns
+  RS(32,16) m'=1 L=8192 hybrid_avx512   total_med=    2892 ns
+  RS(32,16) m'=1 L=8192 hybrid_default  total_med=    1851 ns
+  RS(32,16) m'=1 L=8192 isal_avx2       total_med=   25291 ns
+  RS(32,16) m'=1 L=8192 isal_avx512     total_med=   24194 ns
+  RS(32,16) m'=1 L=8192 isal_default    total_med=   21794 ns
+  RS(32,16) m'=1 L=8192 ours_avx2       total_med=    3552 ns
+  RS(32,16) m'=1 L=8192 ours_avx512     total_med=    2385 ns
+  RS(32,16) m'=2 L=8192 cm256           total_med=    5075 ns
+  RS(32,16) m'=2 L=8192 hybrid_avx2     total_med=    7082 ns
+  RS(32,16) m'=2 L=8192 hybrid_avx512   total_med=    5690 ns
+  RS(32,16) m'=2 L=8192 hybrid_default  total_med=    2309 ns
+  RS(32,16) m'=2 L=8192 isal_avx2       total_med=   27417 ns
+  RS(32,16) m'=2 L=8192 isal_avx512     total_med=   25895 ns
+  RS(32,16) m'=2 L=8192 isal_default    total_med=   22036 ns
+  RS(32,16) m'=2 L=8192 ours_avx2       total_med=    5190 ns
+  RS(32,16) m'=2 L=8192 ours_avx512     total_med=    3319 ns
+  RS(32,16) m'=1 L=9216 cm256           total_med=    2241 ns
+  RS(32,16) m'=1 L=9216 hybrid_avx2     total_med=    5045 ns
+  RS(32,16) m'=1 L=9216 hybrid_avx512   total_med=    3826 ns
+  RS(32,16) m'=1 L=9216 hybrid_default  total_med=    2042 ns
+  RS(32,16) m'=1 L=9216 isal_avx2       total_med=   25710 ns
+  RS(32,16) m'=1 L=9216 isal_avx512     total_med=   24662 ns
+  RS(32,16) m'=1 L=9216 isal_default    total_med=   22249 ns
+  RS(32,16) m'=1 L=9216 ours_avx2       total_med=    3887 ns
+  RS(32,16) m'=1 L=9216 ours_avx512     total_med=    2716 ns
+  RS(32,16) m'=2 L=9216 cm256           total_med=    6020 ns
+  RS(32,16) m'=2 L=9216 hybrid_avx2     total_med=    7603 ns
+  RS(32,16) m'=2 L=9216 hybrid_avx512   total_med=    6230 ns
+  RS(32,16) m'=2 L=9216 hybrid_default  total_med=    2541 ns
+  RS(32,16) m'=2 L=9216 isal_avx2       total_med=   28176 ns
+  RS(32,16) m'=2 L=9216 isal_avx512     total_med=   26648 ns
+  RS(32,16) m'=2 L=9216 isal_default    total_med=   22348 ns
+  RS(32,16) m'=2 L=9216 ours_avx2       total_med=    5718 ns
+  RS(32,16) m'=2 L=9216 ours_avx512     total_med=    3703 ns
+  RS(32,16) m'=1 L=16384 cm256           total_med=    4776 ns
+  RS(32,16) m'=1 L=16384 hybrid_avx2     total_med=    8470 ns
+  RS(32,16) m'=1 L=16384 hybrid_avx512   total_med=    6116 ns
+  RS(32,16) m'=1 L=16384 hybrid_default  total_med=    3598 ns
+  RS(32,16) m'=1 L=16384 isal_avx2       total_med=   29047 ns
+  RS(32,16) m'=1 L=16384 isal_avx512     total_med=   27182 ns
+  RS(32,16) m'=1 L=16384 isal_default    total_med=   24061 ns
+  RS(32,16) m'=1 L=16384 ours_avx2       total_med=    6838 ns
+  RS(32,16) m'=1 L=16384 ours_avx512     total_med=    4649 ns
+  RS(32,16) m'=2 L=16384 cm256           total_med=   11192 ns
+  RS(32,16) m'=2 L=16384 hybrid_avx2     total_med=   13739 ns
+  RS(32,16) m'=2 L=16384 hybrid_avx512   total_med=   10707 ns
+  RS(32,16) m'=2 L=16384 hybrid_default  total_med=    3900 ns
+  RS(32,16) m'=2 L=16384 isal_avx2       total_med=   33330 ns
+  RS(32,16) m'=2 L=16384 isal_avx512     total_med=   30390 ns
+  RS(32,16) m'=2 L=16384 isal_default    total_med=   24105 ns
+  RS(32,16) m'=2 L=16384 ours_avx2       total_med=   10110 ns
+  RS(32,16) m'=2 L=16384 ours_avx512     total_med=    6904 ns
+  RS(32,16) m'=1 L=32768 cm256           total_med=    9624 ns
+  RS(32,16) m'=1 L=32768 hybrid_avx2     total_med=   17361 ns
+  RS(32,16) m'=1 L=32768 hybrid_avx512   total_med=   10956 ns
+  RS(32,16) m'=1 L=32768 hybrid_default  total_med=    7567 ns
+  RS(32,16) m'=1 L=32768 isal_avx2       total_med=   38289 ns
+  RS(32,16) m'=1 L=32768 isal_avx512     total_med=   30932 ns
+  RS(32,16) m'=1 L=32768 isal_default    total_med=   27397 ns
+  RS(32,16) m'=1 L=32768 ours_avx2       total_med=   14296 ns
+  RS(32,16) m'=1 L=32768 ours_avx512     total_med=    9360 ns
+  RS(32,16) m'=2 L=32768 cm256           total_med=   23758 ns
+  RS(32,16) m'=2 L=32768 hybrid_avx2     total_med=   27798 ns
+  RS(32,16) m'=2 L=32768 hybrid_avx512   total_med=   18298 ns
+  RS(32,16) m'=2 L=32768 hybrid_default  total_med=    7413 ns
+  RS(32,16) m'=2 L=32768 isal_avx2       total_med=   47457 ns
+  RS(32,16) m'=2 L=32768 isal_avx512     total_med=   39404 ns
+  RS(32,16) m'=2 L=32768 isal_default    total_med=   27719 ns
+  RS(32,16) m'=2 L=32768 ours_avx2       total_med=   21030 ns
+  RS(32,16) m'=2 L=32768 ours_avx512     total_med=   13502 ns
+  RS(32,16) m'=1 L=65536 cm256           total_med=   22588 ns
+  RS(32,16) m'=1 L=65536 hybrid_avx2     total_med=   38554 ns
+  RS(32,16) m'=1 L=65536 hybrid_avx512   total_med=   24212 ns
+  RS(32,16) m'=1 L=65536 hybrid_default  total_med=   15934 ns
+  RS(32,16) m'=1 L=65536 isal_avx2       total_med=   58980 ns
+  RS(32,16) m'=1 L=65536 isal_avx512     total_med=   44697 ns
+  RS(32,16) m'=1 L=65536 isal_default    total_med=   36401 ns
+  RS(32,16) m'=1 L=65536 ours_avx2       total_med=   31526 ns
+  RS(32,16) m'=1 L=65536 ours_avx512     total_med=   21192 ns
+  RS(32,16) m'=2 L=65536 cm256           total_med=   50514 ns
+  RS(32,16) m'=2 L=65536 hybrid_avx2     total_med=   53053 ns
+  RS(32,16) m'=2 L=65536 hybrid_avx512   total_med=   39992 ns
+  RS(32,16) m'=2 L=65536 hybrid_default  total_med=   17454 ns
+  RS(32,16) m'=2 L=65536 isal_avx2       total_med=   77077 ns
+  RS(32,16) m'=2 L=65536 isal_avx512     total_med=   63023 ns
+  RS(32,16) m'=2 L=65536 isal_default    total_med=   39276 ns
+  RS(32,16) m'=2 L=65536 ours_avx2       total_med=   44566 ns
+  RS(32,16) m'=2 L=65536 ours_avx512     total_med=   29371 ns
+  RS(36,32) m'=1 L=256 cm256           total_med=     336 ns
+  RS(36,32) m'=1 L=256 hybrid_avx2     total_med=     748 ns
+  RS(36,32) m'=1 L=256 hybrid_avx512   total_med=     632 ns
+  RS(36,32) m'=1 L=256 hybrid_default  total_med=     300 ns
+  RS(36,32) m'=1 L=256 isal_avx2       total_med=  163684 ns
+  RS(36,32) m'=1 L=256 isal_avx512     total_med=  163637 ns
+  RS(36,32) m'=1 L=256 isal_default    total_med=  162583 ns
+  RS(36,32) m'=1 L=256 ours_avx2       total_med=     434 ns
+  RS(36,32) m'=1 L=256 ours_avx512     total_med=     409 ns
+  RS(36,32) m'=2 L=256 cm256           total_med=     629 ns
+  RS(36,32) m'=2 L=256 hybrid_avx2     total_med=    1207 ns
+  RS(36,32) m'=2 L=256 hybrid_avx512   total_med=    1085 ns
+  RS(36,32) m'=2 L=256 hybrid_default  total_med=     475 ns
+  RS(36,32) m'=2 L=256 isal_avx2       total_med=  158502 ns
+  RS(36,32) m'=2 L=256 isal_avx512     total_med=  157627 ns
+  RS(36,32) m'=2 L=256 isal_default    total_med=  158121 ns
+  RS(36,32) m'=2 L=256 ours_avx2       total_med=     809 ns
+  RS(36,32) m'=2 L=256 ours_avx512     total_med=     725 ns
+  RS(36,32) m'=1 L=512 cm256           total_med=     425 ns
+  RS(36,32) m'=1 L=512 hybrid_avx2     total_med=     976 ns
+  RS(36,32) m'=1 L=512 hybrid_avx512   total_med=     820 ns
+  RS(36,32) m'=1 L=512 hybrid_default  total_med=     370 ns
+  RS(36,32) m'=1 L=512 isal_avx2       total_med=  163500 ns
+  RS(36,32) m'=1 L=512 isal_avx512     total_med=  163349 ns
+  RS(36,32) m'=1 L=512 isal_default    total_med=  162890 ns
+  RS(36,32) m'=1 L=512 ours_avx2       total_med=     644 ns
+  RS(36,32) m'=1 L=512 ours_avx512     total_med=     525 ns
+  RS(36,32) m'=2 L=512 cm256           total_med=     783 ns
+  RS(36,32) m'=2 L=512 hybrid_avx2     total_med=    1529 ns
+  RS(36,32) m'=2 L=512 hybrid_avx512   total_med=    1313 ns
+  RS(36,32) m'=2 L=512 hybrid_default  total_med=     572 ns
+  RS(36,32) m'=2 L=512 isal_avx2       total_med=  157108 ns
+  RS(36,32) m'=2 L=512 isal_avx512     total_med=  156943 ns
+  RS(36,32) m'=2 L=512 isal_default    total_med=  156469 ns
+  RS(36,32) m'=2 L=512 ours_avx2       total_med=    1032 ns
+  RS(36,32) m'=2 L=512 ours_avx512     total_med=     908 ns
+  RS(36,32) m'=1 L=1024 cm256           total_med=     540 ns
+  RS(36,32) m'=1 L=1024 hybrid_avx2     total_med=    1396 ns
+  RS(36,32) m'=1 L=1024 hybrid_avx512   total_med=    1204 ns
+  RS(36,32) m'=1 L=1024 hybrid_default  total_med=     569 ns
+  RS(36,32) m'=1 L=1024 isal_avx2       total_med=  162806 ns
+  RS(36,32) m'=1 L=1024 isal_avx512     total_med=  162447 ns
+  RS(36,32) m'=1 L=1024 isal_default    total_med=  162212 ns
+  RS(36,32) m'=1 L=1024 ours_avx2       total_med=    1000 ns
+  RS(36,32) m'=1 L=1024 ours_avx512     total_med=     782 ns
+  RS(36,32) m'=2 L=1024 cm256           total_med=    1337 ns
+  RS(36,32) m'=2 L=1024 hybrid_avx2     total_med=    2286 ns
+  RS(36,32) m'=2 L=1024 hybrid_avx512   total_med=    1923 ns
+  RS(36,32) m'=2 L=1024 hybrid_default  total_med=     825 ns
+  RS(36,32) m'=2 L=1024 isal_avx2       total_med=  159703 ns
+  RS(36,32) m'=2 L=1024 isal_avx512     total_med=  159300 ns
+  RS(36,32) m'=2 L=1024 isal_default    total_med=  158565 ns
+  RS(36,32) m'=2 L=1024 ours_avx2       total_med=    1593 ns
+  RS(36,32) m'=2 L=1024 ours_avx512     total_med=    1251 ns
+  RS(36,32) m'=1 L=2048 cm256           total_med=    1350 ns
+  RS(36,32) m'=1 L=2048 hybrid_avx2     total_med=    2537 ns
+  RS(36,32) m'=1 L=2048 hybrid_avx512   total_med=    1893 ns
+  RS(36,32) m'=1 L=2048 hybrid_default  total_med=    1012 ns
+  RS(36,32) m'=1 L=2048 isal_avx2       total_med=  165358 ns
+  RS(36,32) m'=1 L=2048 isal_avx512     total_med=  164741 ns
+  RS(36,32) m'=1 L=2048 isal_default    total_med=  163321 ns
+  RS(36,32) m'=1 L=2048 ours_avx2       total_med=    1945 ns
+  RS(36,32) m'=1 L=2048 ours_avx512     total_med=    1412 ns
+  RS(36,32) m'=2 L=2048 cm256           total_med=    2327 ns
+  RS(36,32) m'=2 L=2048 hybrid_avx2     total_med=    4040 ns
+  RS(36,32) m'=2 L=2048 hybrid_avx512   total_med=    3402 ns
+  RS(36,32) m'=2 L=2048 hybrid_default  total_med=    1384 ns
+  RS(36,32) m'=2 L=2048 isal_avx2       total_med=  161755 ns
+  RS(36,32) m'=2 L=2048 isal_avx512     total_med=  160130 ns
+  RS(36,32) m'=2 L=2048 isal_default    total_med=  157651 ns
+  RS(36,32) m'=2 L=2048 ours_avx2       total_med=    2878 ns
+  RS(36,32) m'=2 L=2048 ours_avx512     total_med=    2206 ns
+  RS(36,32) m'=1 L=4096 cm256           total_med=    1912 ns
+  RS(36,32) m'=1 L=4096 hybrid_avx2     total_med=    4175 ns
+  RS(36,32) m'=1 L=4096 hybrid_avx512   total_med=    3139 ns
+  RS(36,32) m'=1 L=4096 hybrid_default  total_med=    1880 ns
+  RS(36,32) m'=1 L=4096 isal_avx2       total_med=  166959 ns
+  RS(36,32) m'=1 L=4096 isal_avx512     total_med=  165888 ns
+  RS(36,32) m'=1 L=4096 isal_default    total_med=  163623 ns
+  RS(36,32) m'=1 L=4096 ours_avx2       total_med=    3100 ns
+  RS(36,32) m'=1 L=4096 ours_avx512     total_med=    2499 ns
+  RS(36,32) m'=2 L=4096 cm256           total_med=    4246 ns
+  RS(36,32) m'=2 L=4096 hybrid_avx2     total_med=    7245 ns
+  RS(36,32) m'=2 L=4096 hybrid_avx512   total_med=    5830 ns
+  RS(36,32) m'=2 L=4096 hybrid_default  total_med=    2078 ns
+  RS(36,32) m'=2 L=4096 isal_avx2       total_med=  164654 ns
+  RS(36,32) m'=2 L=4096 isal_avx512     total_med=  163418 ns
+  RS(36,32) m'=2 L=4096 isal_default    total_med=  159679 ns
+  RS(36,32) m'=2 L=4096 ours_avx2       total_med=    5295 ns
+  RS(36,32) m'=2 L=4096 ours_avx512     total_med=    3463 ns
+  RS(36,32) m'=1 L=8192 cm256           total_med=    4878 ns
+  RS(36,32) m'=1 L=8192 hybrid_avx2     total_med=    8179 ns
+  RS(36,32) m'=1 L=8192 hybrid_avx512   total_med=    5514 ns
+  RS(36,32) m'=1 L=8192 hybrid_default  total_med=    3400 ns
+  RS(36,32) m'=1 L=8192 isal_avx2       total_med=  170919 ns
+  RS(36,32) m'=1 L=8192 isal_avx512     total_med=  168931 ns
+  RS(36,32) m'=1 L=8192 isal_default    total_med=  164680 ns
+  RS(36,32) m'=1 L=8192 ours_avx2       total_med=    5959 ns
+  RS(36,32) m'=1 L=8192 ours_avx512     total_med=    5134 ns
+  RS(36,32) m'=2 L=8192 cm256           total_med=    9851 ns
+  RS(36,32) m'=2 L=8192 hybrid_avx2     total_med=   13673 ns
+  RS(36,32) m'=2 L=8192 hybrid_avx512   total_med=    9708 ns
+  RS(36,32) m'=2 L=8192 hybrid_default  total_med=    4098 ns
+  RS(36,32) m'=2 L=8192 isal_avx2       total_med=  169884 ns
+  RS(36,32) m'=2 L=8192 isal_avx512     total_med=  167379 ns
+  RS(36,32) m'=2 L=8192 isal_default    total_med=  160585 ns
+  RS(36,32) m'=2 L=8192 ours_avx2       total_med=   10105 ns
+  RS(36,32) m'=2 L=8192 ours_avx512     total_med=    6316 ns
+  RS(36,32) m'=1 L=9216 cm256           total_med=    5576 ns
+  RS(36,32) m'=1 L=9216 hybrid_avx2     total_med=    9250 ns
+  RS(36,32) m'=1 L=9216 hybrid_avx512   total_med=    6840 ns
+  RS(36,32) m'=1 L=9216 hybrid_default  total_med=    3897 ns
+  RS(36,32) m'=1 L=9216 isal_avx2       total_med=  171142 ns
+  RS(36,32) m'=1 L=9216 isal_avx512     total_med=  169678 ns
+  RS(36,32) m'=1 L=9216 isal_default    total_med=  166026 ns
+  RS(36,32) m'=1 L=9216 ours_avx2       total_med=    6494 ns
+  RS(36,32) m'=1 L=9216 ours_avx512     total_med=    5107 ns
+  RS(36,32) m'=2 L=9216 cm256           total_med=   11000 ns
+  RS(36,32) m'=2 L=9216 hybrid_avx2     total_med=   14060 ns
+  RS(36,32) m'=2 L=9216 hybrid_avx512   total_med=   11943 ns
+  RS(36,32) m'=2 L=9216 hybrid_default  total_med=    4007 ns
+  RS(36,32) m'=2 L=9216 isal_avx2       total_med=  170850 ns
+  RS(36,32) m'=2 L=9216 isal_avx512     total_med=  168497 ns
+  RS(36,32) m'=2 L=9216 isal_default    total_med=  161072 ns
+  RS(36,32) m'=2 L=9216 ours_avx2       total_med=   11209 ns
+  RS(36,32) m'=2 L=9216 ours_avx512     total_med=    6997 ns
+  RS(36,32) m'=1 L=16384 cm256           total_med=    7818 ns
+  RS(36,32) m'=1 L=16384 hybrid_avx2     total_med=   18538 ns
+  RS(36,32) m'=1 L=16384 hybrid_avx512   total_med=   10996 ns
+  RS(36,32) m'=1 L=16384 hybrid_default  total_med=    7768 ns
+  RS(36,32) m'=1 L=16384 isal_avx2       total_med=  180239 ns
+  RS(36,32) m'=1 L=16384 isal_avx512     total_med=  170939 ns
+  RS(36,32) m'=1 L=16384 isal_default    total_med=  167744 ns
+  RS(36,32) m'=1 L=16384 ours_avx2       total_med=   14017 ns
+  RS(36,32) m'=1 L=16384 ours_avx512     total_med=    9487 ns
+  RS(36,32) m'=2 L=16384 cm256           total_med=   23702 ns
+  RS(36,32) m'=2 L=16384 hybrid_avx2     total_med=   27936 ns
+  RS(36,32) m'=2 L=16384 hybrid_avx512   total_med=   18362 ns
+  RS(36,32) m'=2 L=16384 hybrid_default  total_med=    7593 ns
+  RS(36,32) m'=2 L=16384 isal_avx2       total_med=  183667 ns
+  RS(36,32) m'=2 L=16384 isal_avx512     total_med=  174148 ns
+  RS(36,32) m'=2 L=16384 isal_default    total_med=  163224 ns
+  RS(36,32) m'=2 L=16384 ours_avx2       total_med=   21008 ns
+  RS(36,32) m'=2 L=16384 ours_avx512     total_med=   12932 ns
+  RS(36,32) m'=1 L=32768 cm256           total_med=   19222 ns
+  RS(36,32) m'=1 L=32768 hybrid_avx2     total_med=   38983 ns
+  RS(36,32) m'=1 L=32768 hybrid_avx512   total_med=   21787 ns
+  RS(36,32) m'=1 L=32768 hybrid_default  total_med=   13826 ns
+  RS(36,32) m'=1 L=32768 isal_avx2       total_med=  198874 ns
+  RS(36,32) m'=1 L=32768 isal_avx512     total_med=  182121 ns
+  RS(36,32) m'=1 L=32768 isal_default    total_med=  175865 ns
+  RS(36,32) m'=1 L=32768 ours_avx2       total_med=   31071 ns
+  RS(36,32) m'=1 L=32768 ours_avx512     total_med=   19104 ns
+  RS(36,32) m'=2 L=32768 cm256           total_med=   48245 ns
+  RS(36,32) m'=2 L=32768 hybrid_avx2     total_med=   55476 ns
+  RS(36,32) m'=2 L=32768 hybrid_avx512   total_med=   35900 ns
+  RS(36,32) m'=2 L=32768 hybrid_default  total_med=   15349 ns
+  RS(36,32) m'=2 L=32768 isal_avx2       total_med=  213911 ns
+  RS(36,32) m'=2 L=32768 isal_avx512     total_med=  195021 ns
+  RS(36,32) m'=2 L=32768 isal_default    total_med=  171486 ns
+  RS(36,32) m'=2 L=32768 ours_avx2       total_med=   43184 ns
+  RS(36,32) m'=2 L=32768 ours_avx512     total_med=   25117 ns
+  RS(36,32) m'=1 L=65536 cm256           total_med=   57267 ns
+  RS(36,32) m'=1 L=65536 hybrid_avx2     total_med=   97222 ns
+  RS(36,32) m'=1 L=65536 hybrid_avx512   total_med=   73356 ns
+  RS(36,32) m'=1 L=65536 hybrid_default  total_med=   43423 ns
+  RS(36,32) m'=1 L=65536 isal_avx2       total_med=  259051 ns
+  RS(36,32) m'=1 L=65536 isal_avx512     total_med=  235628 ns
+  RS(36,32) m'=1 L=65536 isal_default    total_med=  205712 ns
+  RS(36,32) m'=1 L=65536 ours_avx2       total_med=   89180 ns
+  RS(36,32) m'=1 L=65536 ours_avx512     total_med=   69098 ns
+  RS(36,32) m'=2 L=65536 cm256           total_med=  108160 ns
+  RS(36,32) m'=2 L=65536 hybrid_avx2     total_med=  145422 ns
+  RS(36,32) m'=2 L=65536 hybrid_avx512   total_med=  111149 ns
+  RS(36,32) m'=2 L=65536 hybrid_default  total_med=   63969 ns
+  RS(36,32) m'=2 L=65536 isal_avx2       total_med=  303495 ns
+  RS(36,32) m'=2 L=65536 isal_avx512     total_med=  268828 ns
+  RS(36,32) m'=2 L=65536 isal_default    total_med=  221807 ns
+  RS(36,32) m'=2 L=65536 ours_avx2       total_med=  129406 ns
+  RS(36,32) m'=2 L=65536 ours_avx512     total_med=   95302 ns
+>> [3/3] multi-core throughput
+CPU: Intel(R) Xeon(R) Platinum 8488C | best ISA: avx512 | data: warm
+  encode RS(18,16) m'=1 L=4096 cm256          T=1  143.17 Gbps
+  encode RS(18,16) m'=1 L=4096 cm256          T=2  287.94 Gbps
+  encode RS(18,16) m'=1 L=4096 cm256          T=3  425.99 Gbps
+  decode RS(18,16) m'=1 L=4096 cm256          T=1  254.19 Gbps
+  decode RS(18,16) m'=1 L=4096 cm256          T=2  515.86 Gbps
+  decode RS(18,16) m'=1 L=4096 cm256          T=3  738.26 Gbps
+  encode RS(18,16) m'=1 L=4096 isal_avx2      T=1  144.65 Gbps
+  encode RS(18,16) m'=1 L=4096 isal_avx2      T=2  290.23 Gbps
+  encode RS(18,16) m'=1 L=4096 isal_avx2      T=3  432.53 Gbps
+  decode RS(18,16) m'=1 L=4096 isal_avx2      T=1  22.49 Gbps
+  decode RS(18,16) m'=1 L=4096 isal_avx2      T=2  45.03 Gbps
+  decode RS(18,16) m'=1 L=4096 isal_avx2      T=3  67.54 Gbps
+  encode RS(18,16) m'=1 L=4096 isal_avx512    T=1  192.63 Gbps
+  encode RS(18,16) m'=1 L=4096 isal_avx512    T=2  387.83 Gbps
+  encode RS(18,16) m'=1 L=4096 isal_avx512    T=3  567.89 Gbps
+  decode RS(18,16) m'=1 L=4096 isal_avx512    T=1  22.97 Gbps
+  decode RS(18,16) m'=1 L=4096 isal_avx512    T=2  46.28 Gbps
+  decode RS(18,16) m'=1 L=4096 isal_avx512    T=3  68.97 Gbps
+  encode RS(18,16) m'=1 L=4096 isal_default   T=1  242.86 Gbps
+  encode RS(18,16) m'=1 L=4096 isal_default   T=2  491.39 Gbps
+  encode RS(18,16) m'=1 L=4096 isal_default   T=3  683.59 Gbps
+  decode RS(18,16) m'=1 L=4096 isal_default   T=1  23.62 Gbps
+  decode RS(18,16) m'=1 L=4096 isal_default   T=2  47.30 Gbps
+  decode RS(18,16) m'=1 L=4096 isal_default   T=3  71.13 Gbps
+  encode RS(18,16) m'=1 L=4096 ours_avx2      T=1  175.75 Gbps
+  encode RS(18,16) m'=1 L=4096 ours_avx2      T=2  355.74 Gbps
+  encode RS(18,16) m'=1 L=4096 ours_avx2      T=3  526.07 Gbps
+  decode RS(18,16) m'=1 L=4096 ours_avx2      T=1  198.26 Gbps
+  decode RS(18,16) m'=1 L=4096 ours_avx2      T=2  400.64 Gbps
+  decode RS(18,16) m'=1 L=4096 ours_avx2      T=3  573.23 Gbps
+  encode RS(18,16) m'=1 L=4096 ours_avx512    T=1  211.07 Gbps
+  encode RS(18,16) m'=1 L=4096 ours_avx512    T=2  429.27 Gbps
+  encode RS(18,16) m'=1 L=4096 ours_avx512    T=3  614.25 Gbps
+  decode RS(18,16) m'=1 L=4096 ours_avx512    T=1  210.64 Gbps
+  decode RS(18,16) m'=1 L=4096 ours_avx512    T=2  424.75 Gbps
+  decode RS(18,16) m'=1 L=4096 ours_avx512    T=3  599.92 Gbps
+  decode RS(18,16) m'=2 L=4096 cm256          T=1  158.08 Gbps
+  decode RS(18,16) m'=2 L=4096 cm256          T=2  319.07 Gbps
+  decode RS(18,16) m'=2 L=4096 cm256          T=3  463.05 Gbps
+  decode RS(18,16) m'=2 L=4096 isal_avx2      T=1  21.38 Gbps
+  decode RS(18,16) m'=2 L=4096 isal_avx2      T=2  42.95 Gbps
+  decode RS(18,16) m'=2 L=4096 isal_avx2      T=3  64.82 Gbps
+  decode RS(18,16) m'=2 L=4096 isal_avx512    T=1  22.32 Gbps
+  decode RS(18,16) m'=2 L=4096 isal_avx512    T=2  44.57 Gbps
+  decode RS(18,16) m'=2 L=4096 isal_avx512    T=3  67.23 Gbps
+  decode RS(18,16) m'=2 L=4096 isal_default   T=1  23.54 Gbps
+  decode RS(18,16) m'=2 L=4096 isal_default   T=2  47.12 Gbps
+  decode RS(18,16) m'=2 L=4096 isal_default   T=3  70.79 Gbps
+  decode RS(18,16) m'=2 L=4096 ours_avx2      T=1  162.71 Gbps
+  decode RS(18,16) m'=2 L=4096 ours_avx2      T=2  327.32 Gbps
+  decode RS(18,16) m'=2 L=4096 ours_avx2      T=3  485.10 Gbps
+  decode RS(18,16) m'=2 L=4096 ours_avx512    T=1  189.51 Gbps
+  decode RS(18,16) m'=2 L=4096 ours_avx512    T=2  381.62 Gbps
+  decode RS(18,16) m'=2 L=4096 ours_avx512    T=3  553.67 Gbps
+  encode RS(32,16) m'=1 L=4096 cm256          T=1  20.75 Gbps
+  encode RS(32,16) m'=1 L=4096 cm256          T=2  41.55 Gbps
+  encode RS(32,16) m'=1 L=4096 cm256          T=3  62.26 Gbps
+  decode RS(32,16) m'=1 L=4096 cm256          T=1  253.81 Gbps
+  decode RS(32,16) m'=1 L=4096 cm256          T=2  514.80 Gbps
+  decode RS(32,16) m'=1 L=4096 cm256          T=3  735.87 Gbps
+  encode RS(32,16) m'=1 L=4096 isal_avx2      T=1  25.59 Gbps
+  encode RS(32,16) m'=1 L=4096 isal_avx2      T=2  51.15 Gbps
+  encode RS(32,16) m'=1 L=4096 isal_avx2      T=3  76.77 Gbps
+  decode RS(32,16) m'=1 L=4096 isal_avx2      T=1  22.72 Gbps
+  decode RS(32,16) m'=1 L=4096 isal_avx2      T=2  45.53 Gbps
+  decode RS(32,16) m'=1 L=4096 isal_avx2      T=3  68.09 Gbps
+  encode RS(32,16) m'=1 L=4096 isal_avx512    T=1  29.12 Gbps
+  encode RS(32,16) m'=1 L=4096 isal_avx512    T=2  58.33 Gbps
+  encode RS(32,16) m'=1 L=4096 isal_avx512    T=3  87.46 Gbps
+  decode RS(32,16) m'=1 L=4096 isal_avx512    T=1  23.21 Gbps
+  decode RS(32,16) m'=1 L=4096 isal_avx512    T=2  46.28 Gbps
+  decode RS(32,16) m'=1 L=4096 isal_avx512    T=3  69.70 Gbps
+  encode RS(32,16) m'=1 L=4096 isal_default   T=1  87.59 Gbps
+  encode RS(32,16) m'=1 L=4096 isal_default   T=2  174.41 Gbps
+  encode RS(32,16) m'=1 L=4096 isal_default   T=3  262.78 Gbps
+  decode RS(32,16) m'=1 L=4096 isal_default   T=1  23.87 Gbps
+  decode RS(32,16) m'=1 L=4096 isal_default   T=2  47.51 Gbps
+  decode RS(32,16) m'=1 L=4096 isal_default   T=3  71.41 Gbps
+  encode RS(32,16) m'=1 L=4096 ours_avx2      T=1  31.17 Gbps
+  encode RS(32,16) m'=1 L=4096 ours_avx2      T=2  62.31 Gbps
+  encode RS(32,16) m'=1 L=4096 ours_avx2      T=3  93.50 Gbps
+  decode RS(32,16) m'=1 L=4096 ours_avx2      T=1  195.46 Gbps
+  decode RS(32,16) m'=1 L=4096 ours_avx2      T=2  394.55 Gbps
+  decode RS(32,16) m'=1 L=4096 ours_avx2      T=3  564.50 Gbps
+  encode RS(32,16) m'=1 L=4096 ours_avx512    T=1  50.27 Gbps
+  encode RS(32,16) m'=1 L=4096 ours_avx512    T=2  100.41 Gbps
+  encode RS(32,16) m'=1 L=4096 ours_avx512    T=3  150.13 Gbps
+  decode RS(32,16) m'=1 L=4096 ours_avx512    T=1  208.58 Gbps
+  decode RS(32,16) m'=1 L=4096 ours_avx512    T=2  420.69 Gbps
+  decode RS(32,16) m'=1 L=4096 ours_avx512    T=3  593.96 Gbps
+  decode RS(32,16) m'=2 L=4096 cm256          T=1  155.47 Gbps
+  decode RS(32,16) m'=2 L=4096 cm256          T=2  312.86 Gbps
+  decode RS(32,16) m'=2 L=4096 cm256          T=3  454.80 Gbps
+  decode RS(32,16) m'=2 L=4096 isal_avx2      T=1  21.23 Gbps
+  decode RS(32,16) m'=2 L=4096 isal_avx2      T=2  42.34 Gbps
+  decode RS(32,16) m'=2 L=4096 isal_avx2      T=3  64.43 Gbps
+  decode RS(32,16) m'=2 L=4096 isal_avx512    T=1  22.39 Gbps
+  decode RS(32,16) m'=2 L=4096 isal_avx512    T=2  44.77 Gbps
+  decode RS(32,16) m'=2 L=4096 isal_avx512    T=3  66.80 Gbps
+  decode RS(32,16) m'=2 L=4096 isal_default   T=1  23.68 Gbps
+  decode RS(32,16) m'=2 L=4096 isal_default   T=2  47.37 Gbps
+  decode RS(32,16) m'=2 L=4096 isal_default   T=3  70.99 Gbps
+  decode RS(32,16) m'=2 L=4096 ours_avx2      T=1  157.49 Gbps
+  decode RS(32,16) m'=2 L=4096 ours_avx2      T=2  316.71 Gbps
+  decode RS(32,16) m'=2 L=4096 ours_avx2      T=3  467.03 Gbps
+  decode RS(32,16) m'=2 L=4096 ours_avx512    T=1  181.57 Gbps
+  decode RS(32,16) m'=2 L=4096 ours_avx512    T=2  366.56 Gbps
+  decode RS(32,16) m'=2 L=4096 ours_avx512    T=3  529.93 Gbps
+  encode RS(36,32) m'=1 L=4096 cm256          T=1  73.43 Gbps
+  encode RS(36,32) m'=1 L=4096 cm256          T=2  158.37 Gbps
+  encode RS(36,32) m'=1 L=4096 cm256          T=3  237.22 Gbps
+  decode RS(36,32) m'=1 L=4096 cm256          T=1  255.59 Gbps
+  decode RS(36,32) m'=1 L=4096 cm256          T=2  518.03 Gbps
+  decode RS(36,32) m'=1 L=4096 cm256          T=3  744.22 Gbps
+  encode RS(36,32) m'=1 L=4096 isal_avx2      T=1  91.51 Gbps
+  encode RS(36,32) m'=1 L=4096 isal_avx2      T=2  183.31 Gbps
+  encode RS(36,32) m'=1 L=4096 isal_avx2      T=3  276.47 Gbps
+  decode RS(36,32) m'=1 L=4096 isal_avx2      T=1  6.30 Gbps
+  decode RS(36,32) m'=1 L=4096 isal_avx2      T=2  12.64 Gbps
+  decode RS(36,32) m'=1 L=4096 isal_avx2      T=3  18.98 Gbps
+  encode RS(36,32) m'=1 L=4096 isal_avx512    T=1  109.99 Gbps
+  encode RS(36,32) m'=1 L=4096 isal_avx512    T=2  221.03 Gbps
+  encode RS(36,32) m'=1 L=4096 isal_avx512    T=3  330.32 Gbps
+  decode RS(36,32) m'=1 L=4096 isal_avx512    T=1  6.33 Gbps
+  decode RS(36,32) m'=1 L=4096 isal_avx512    T=2  12.67 Gbps
+  decode RS(36,32) m'=1 L=4096 isal_avx512    T=3  18.99 Gbps
+  encode RS(36,32) m'=1 L=4096 isal_default   T=1  201.98 Gbps
+  encode RS(36,32) m'=1 L=4096 isal_default   T=2  408.73 Gbps
+  encode RS(36,32) m'=1 L=4096 isal_default   T=3  593.00 Gbps
+  decode RS(36,32) m'=1 L=4096 isal_default   T=1  6.39 Gbps
+  decode RS(36,32) m'=1 L=4096 isal_default   T=2  12.82 Gbps
+  decode RS(36,32) m'=1 L=4096 isal_default   T=3  19.03 Gbps
+  encode RS(36,32) m'=1 L=4096 ours_avx2      T=1  116.30 Gbps
+  encode RS(36,32) m'=1 L=4096 ours_avx2      T=2  232.58 Gbps
+  encode RS(36,32) m'=1 L=4096 ours_avx2      T=3  346.38 Gbps
+  decode RS(36,32) m'=1 L=4096 ours_avx2      T=1  191.13 Gbps
+  decode RS(36,32) m'=1 L=4096 ours_avx2      T=2  384.14 Gbps
+  decode RS(36,32) m'=1 L=4096 ours_avx2      T=3  560.62 Gbps
+  encode RS(36,32) m'=1 L=4096 ours_avx512    T=1  158.88 Gbps
+  encode RS(36,32) m'=1 L=4096 ours_avx512    T=2  314.57 Gbps
+  encode RS(36,32) m'=1 L=4096 ours_avx512    T=3  460.13 Gbps
+  decode RS(36,32) m'=1 L=4096 ours_avx512    T=1  206.97 Gbps
+  decode RS(36,32) m'=1 L=4096 ours_avx512    T=2  416.75 Gbps
+  decode RS(36,32) m'=1 L=4096 ours_avx512    T=3  598.51 Gbps
+  decode RS(36,32) m'=2 L=4096 cm256          T=1  156.56 Gbps
+  decode RS(36,32) m'=2 L=4096 cm256          T=2  315.62 Gbps
+  decode RS(36,32) m'=2 L=4096 cm256          T=3  456.20 Gbps
+  decode RS(36,32) m'=2 L=4096 isal_avx2      T=1  6.35 Gbps
+  decode RS(36,32) m'=2 L=4096 isal_avx2      T=2  12.62 Gbps
+  decode RS(36,32) m'=2 L=4096 isal_avx2      T=3  18.76 Gbps
+  decode RS(36,32) m'=2 L=4096 isal_avx512    T=1  6.41 Gbps
+  decode RS(36,32) m'=2 L=4096 isal_avx512    T=2  12.76 Gbps
+  decode RS(36,32) m'=2 L=4096 isal_avx512    T=3  18.96 Gbps
+  decode RS(36,32) m'=2 L=4096 isal_default   T=1  6.50 Gbps
+  decode RS(36,32) m'=2 L=4096 isal_default   T=2  12.95 Gbps
+  decode RS(36,32) m'=2 L=4096 isal_default   T=3  19.29 Gbps
+  decode RS(36,32) m'=2 L=4096 ours_avx2      T=1  153.61 Gbps
+  decode RS(36,32) m'=2 L=4096 ours_avx2      T=2  308.89 Gbps
+  decode RS(36,32) m'=2 L=4096 ours_avx2      T=3  456.68 Gbps
+  decode RS(36,32) m'=2 L=4096 ours_avx512    T=1  176.43 Gbps
+  decode RS(36,32) m'=2 L=4096 ours_avx512    T=2  354.34 Gbps
+  decode RS(36,32) m'=2 L=4096 ours_avx512    T=3  517.94 Gbps
+>> figures
+# ISA-L comparison — summary
+
+CPU: **Intel(R) Xeon(R) Platinum 8488C** · SIMD: `avx2 avx512bw avx512f gfni vpclmulqdq` · governor: `n/a`
+
+Kernel compared: **avx512** (same ISA for both libraries).
+
+## Decode latency, 4 KB packets (median µs, single pinned core)
+
+| code | m' | v3 scalar | ISA-L total | ISA-L matrix | ISA-L region (= cached) | this work | speedup vs ISA-L | speedup vs cached ISA-L |
+|---|---|---|---|---|---|---|---|---|
+| RS(5,4) | 1 | 9.5 | 0.99 | 0.53 | 0.45 | 0.39 | 2.5× | 1.14× |
+| RS(8,4) | 1 | 9.4 | 1.01 | 0.53 | 0.48 | 0.39 | 2.6× | 1.23× |
+| RS(8,4) | 2 | 18.3 | 1.22 | 0.55 | 0.67 | 0.58 | 2.1× | 1.15× |
+| RS(8,4) | 4 | 36.4 | 1.85 | 0.68 | 1.17 | 0.94 | 2.0× | 1.25× |
+| RS(16,8) | 1 | 19.0 | 3.81 | 2.86 | 0.95 | 0.82 | 4.6× | 1.16× |
+| RS(16,8) | 2 | 35.7 | 4.32 | 2.91 | 1.40 | 1.19 | 3.6× | 1.18× |
+| RS(16,8) | 4 | 70.3 | 5.52 | 2.97 | 2.55 | 2.00 | 2.8× | 1.28× |
+| RS(16,8) | 8 | 142.6 | 7.45 | 2.70 | 4.74 | 3.61 | 2.1× | 1.31× |
+| RS(17,16) | 1 | 36.9 | 22.16 | 20.16 | 1.99 | 1.28 | 17.4× | 1.56× |
+| RS(18,16) | 1 | 37.0 | 22.31 | 20.39 | 1.93 | 1.27 | 17.6× | 1.52× |
+| RS(18,16) | 2 | 70.6 | 23.35 | 20.31 | 3.03 | 1.83 | 12.7× | 1.65× |
+| RS(20,16) | 1 | 37.0 | 22.39 | 20.42 | 1.95 | 1.28 | 17.5× | 1.52× |
+| RS(20,16) | 2 | 70.5 | 23.27 | 20.29 | 2.96 | 1.82 | 12.8× | 1.63× |
+| RS(20,16) | 4 | 138.2 | 25.34 | 20.22 | 5.12 | 3.06 | 8.3× | 1.67× |
+| RS(32,16) | 1 | 36.8 | 22.46 | 20.46 | 2.04 | 1.51 | 14.8× | 1.35× |
+| RS(32,16) | 2 | 70.3 | 23.24 | 20.24 | 2.98 | 1.90 | 12.2× | 1.57× |
+| RS(32,16) | 4 | 138.6 | 25.27 | 20.15 | 5.13 | 3.09 | 8.2× | 1.66× |
+| RS(32,16) | 16 | 566.5 | 36.73 | 18.14 | 17.72 | 14.80 | 2.5× | 1.20× |
+| RS(34,32) | 1 | 72.9 | 164.46 | 160.55 | 3.88 | 2.47 | 66.6× | 1.57× |
+| RS(34,32) | 2 | 139.5 | 162.55 | 156.67 | 5.83 | 3.44 | 47.3× | 1.70× |
+| RS(36,32) | 1 | 72.5 | 164.04 | 160.25 | 3.73 | 2.49 | 65.9× | 1.50× |
+| RS(36,32) | 2 | 139.1 | 162.50 | 156.37 | 5.90 | 3.44 | 47.3× | 1.72× |
+| RS(36,32) | 4 | 275.8 | 163.60 | 154.28 | 8.92 | 5.78 | 28.3× | 1.54× |
+
+*Cached ISA-L* = ISA-L whose decode matrix for this exact loss pattern is already cached, so only the region multiply remains. Speedup < 1 there means the cached baseline wins.
+
+## Best available kernel (ISA-L dispatcher; GFNI if the CPU has it), 4 KB, median µs
+
+| code | m' | ISA-L total | ISA-L cached (region only) | m×m + ISA-L kernel | speedup vs ISA-L | vs cached ISA-L |
+|---|---|---|---|---|---|---|
+| RS(5,4) | 1 | 0.67 | 0.21 | 0.34 | 2.0× | 0.61× |
+| RS(8,4) | 1 | 0.67 | 0.21 | 0.34 | 2.0× | 0.61× |
+| RS(8,4) | 2 | 0.71 | 0.24 | 0.34 | 2.1× | 0.72× |
+| RS(8,4) | 4 | 0.83 | 0.41 | 0.59 | 1.4× | 0.70× |
+| RS(16,8) | 1 | 3.14 | 0.38 | 0.48 | 6.5× | 0.78× |
+| RS(16,8) | 2 | 3.28 | 0.51 | 0.68 | 4.8× | 0.75× |
+| RS(16,8) | 4 | 3.69 | 0.93 | 1.12 | 3.3× | 0.83× |
+| RS(16,8) | 8 | 4.04 | 1.66 | 2.22 | 1.8× | 0.75× |
+| RS(17,16) | 1 | 20.74 | 0.78 | 0.84 | 24.8× | 0.93× |
+| RS(18,16) | 1 | 20.95 | 0.77 | 0.83 | 25.2× | 0.93× |
+| RS(18,16) | 2 | 20.91 | 1.18 | 1.03 | 20.3× | 1.14× |
+| RS(20,16) | 1 | 20.96 | 0.79 | 0.84 | 24.8× | 0.93× |
+| RS(20,16) | 2 | 21.17 | 1.13 | 1.07 | 19.7× | 1.05× |
+| RS(20,16) | 4 | 21.71 | 1.89 | 1.85 | 11.7× | 1.02× |
+| RS(32,16) | 1 | 20.95 | 0.77 | 0.95 | 22.0× | 0.81× |
+| RS(32,16) | 2 | 21.14 | 1.16 | 1.25 | 16.9× | 0.93× |
+| RS(32,16) | 4 | 21.65 | 1.91 | 2.18 | 9.9× | 0.88× |
+| RS(32,16) | 16 | 23.40 | 6.44 | 10.47 | 2.2× | 0.62× |
+| RS(34,32) | 1 | 162.19 | 1.86 | 1.84 | 88.2× | 1.01× |
+| RS(34,32) | 2 | 158.85 | 2.42 | 2.05 | 77.6× | 1.18× |
+| RS(36,32) | 1 | 162.21 | 1.84 | 1.79 | 90.8× | 1.03× |
+| RS(36,32) | 2 | 158.73 | 2.42 | 2.05 | 77.4× | 1.18× |
+| RS(36,32) | 4 | 157.56 | 3.85 | 3.42 | 46.1× | 1.13× |
+
+## vs cm256 (open-source erasure-count decoder), 4 KB, median µs
+
+| code | m' | cm256 | m×m + ISA-L kernel | this work (avx512) | best of ours vs cm256 |
+|---|---|---|---|---|---|
+| RS(5,4) | 1 | 0.19 | 0.34 | 0.39 | 0.57× |
+| RS(8,4) | 1 | 0.20 | 0.34 | 0.39 | 0.58× |
+| RS(8,4) | 2 | 0.56 | 0.34 | 0.58 | 1.64× |
+| RS(8,4) | 4 | 1.22 | 0.59 | 0.94 | 2.06× |
+| RS(16,8) | 1 | 0.43 | 0.48 | 0.82 | 0.89× |
+| RS(16,8) | 2 | 1.17 | 0.68 | 1.19 | 1.71× |
+| RS(16,8) | 4 | 2.45 | 1.12 | 2.00 | 2.19× |
+| RS(16,8) | 8 | 5.24 | 2.22 | 3.61 | 2.36× |
+| RS(17,16) | 1 | 0.94 | 0.84 | 1.28 | 1.13× |
+| RS(18,16) | 1 | 1.01 | 0.83 | 1.27 | 1.22× |
+| RS(18,16) | 2 | 2.12 | 1.03 | 1.83 | 2.05× |
+| RS(20,16) | 1 | 0.88 | 0.84 | 1.28 | 1.04× |
+| RS(20,16) | 2 | 2.29 | 1.07 | 1.82 | 2.13× |
+| RS(20,16) | 4 | 4.99 | 1.85 | 3.06 | 2.70× |
+| RS(32,16) | 1 | 1.28 | 0.95 | 1.51 | 1.34× |
+| RS(32,16) | 2 | 2.64 | 1.25 | 1.90 | 2.11× |
+| RS(32,16) | 4 | 5.02 | 2.18 | 3.09 | 2.31× |
+| RS(32,16) | 16 | 22.10 | 10.47 | 14.80 | 2.11× |
+| RS(34,32) | 1 | 1.85 | 1.84 | 2.47 | 1.01× |
+| RS(34,32) | 2 | 5.29 | 2.05 | 3.44 | 2.58× |
+| RS(36,32) | 1 | 2.61 | 1.79 | 2.49 | 1.46× |
+| RS(36,32) | 2 | 4.26 | 2.05 | 3.44 | 2.08× |
+| RS(36,32) | 4 | 10.80 | 3.42 | 5.78 | 3.16× |
+
+cm256's first recovery row is all-ones (plain XOR), so a single loss recovered from it needs no multiplications; compare m'≥2 for the decoder itself. cm256 gets its own parity for the same data and loss patterns.
+
+## Packet-size crossover
+
+- RS(8,4) m'=1: vs cm256 0.46–0.97×
+- RS(8,4) m'=1: speedup vs ISA-L 1.4–4.4×; vs cached ISA-L 0.79–1.33× (cached ISA-L faster at 256, 512, 1024, 2048 B)
+- RS(8,4) m'=2: vs cm256 0.62–1.53×
+- RS(8,4) m'=2: speedup vs ISA-L 1.5–3.3×; vs cached ISA-L 0.62–1.47× (cached ISA-L faster at 256, 512, 1024 B)
+- RS(18,16) m'=1: vs cm256 0.58–1.14×
+- RS(18,16) m'=1: speedup vs ISA-L 2.2–81.2×; vs cached ISA-L 0.96–1.61× (cached ISA-L faster at 512 B)
+- RS(18,16) m'=2: vs cm256 0.81–1.88×
+- RS(18,16) m'=2: speedup vs ISA-L 2.1–51.8×; vs cached ISA-L 0.85–1.78× (cached ISA-L faster at 256 B)
+- RS(32,16) m'=1: vs cm256 0.58–1.07×
+- RS(32,16) m'=1: speedup vs ISA-L 2.1–80.7×; vs cached ISA-L 1.05–1.61×
+- RS(32,16) m'=2: vs cm256 0.81–1.76×
+- RS(32,16) m'=2: speedup vs ISA-L 2.1–51.3×; vs cached ISA-L 0.84–1.78× (cached ISA-L faster at 256 B)
+- RS(36,32) m'=1: vs cm256 0.69–1.09×
+- RS(36,32) m'=1: speedup vs ISA-L 3.4–400.1×; vs cached ISA-L 1.05–1.53×
+- RS(36,32) m'=2: vs cm256 0.86–1.92×
+- RS(36,32) m'=2: speedup vs ISA-L 2.8–217.4×; vs cached ISA-L 0.96–1.70× (cached ISA-L faster at 256, 512 B)
+
+## Cores needed for line rate (4 KB packets)
+
+Decode assumes every codeword lost m' data packets (worst case). Encode runs on every codeword, so it usually sets the core count.
+
+| code | op | m' | method | Gbps/core (1 thread) | Gbps at max threads | cores for 100G | cores for 400G |
+|---|---|---|---|---|---|---|---|
+| RS(18,16) | decode | 1 | cm256 | 254.2 | 738.3 @ 3 | 1 | 2 |
+| RS(18,16) | decode | 2 | cm256 | 158.1 | 463.1 @ 3 | 1 | 3 |
+| RS(18,16) | decode | 1 | isal_avx2 | 22.5 | 67.5 @ 3 | 5 | 18 |
+| RS(18,16) | decode | 2 | isal_avx2 | 21.4 | 64.8 @ 3 | 5 | 19 |
+| RS(18,16) | decode | 1 | isal_avx512 | 23.0 | 69.0 @ 3 | 5 | 18 |
+| RS(18,16) | decode | 2 | isal_avx512 | 22.3 | 67.2 @ 3 | 5 | 18 |
+| RS(18,16) | decode | 1 | isal_default | 23.6 | 71.1 @ 3 | 5 | 17 |
+| RS(18,16) | decode | 2 | isal_default | 23.5 | 70.8 @ 3 | 5 | 17 |
+| RS(18,16) | decode | 1 | ours_avx2 | 198.3 | 573.2 @ 3 | 1 | 3 |
+| RS(18,16) | decode | 2 | ours_avx2 | 162.7 | 485.1 @ 3 | 1 | 3 |
+| RS(18,16) | decode | 1 | ours_avx512 | 210.6 | 599.9 @ 3 | 1 | 3 |
+| RS(18,16) | decode | 2 | ours_avx512 | 189.5 | 553.7 @ 3 | 1 | 3 |
+| RS(18,16) | encode | - | cm256 | 143.2 | 426.0 @ 3 | 1 | 3 |
+| RS(18,16) | encode | - | isal_avx2 | 144.7 | 432.5 @ 3 | 1 | 3 |
+| RS(18,16) | encode | - | isal_avx512 | 192.6 | 567.9 @ 3 | 1 | 3 |
+| RS(18,16) | encode | - | isal_default | 242.9 | 683.6 @ 3 | 1 | 2 |
+| RS(18,16) | encode | - | ours_avx2 | 175.7 | 526.1 @ 3 | 1 | 3 |
+| RS(18,16) | encode | - | ours_avx512 | 211.1 | 614.3 @ 3 | 1 | 2 |
+| RS(32,16) | decode | 1 | cm256 | 253.8 | 735.9 @ 3 | 1 | 2 |
+| RS(32,16) | decode | 2 | cm256 | 155.5 | 454.8 @ 3 | 1 | 3 |
+| RS(32,16) | decode | 1 | isal_avx2 | 22.7 | 68.1 @ 3 | 5 | 18 |
+| RS(32,16) | decode | 2 | isal_avx2 | 21.2 | 64.4 @ 3 | 5 | 19 |
+| RS(32,16) | decode | 1 | isal_avx512 | 23.2 | 69.7 @ 3 | 5 | 18 |
+| RS(32,16) | decode | 2 | isal_avx512 | 22.4 | 66.8 @ 3 | 5 | 18 |
+| RS(32,16) | decode | 1 | isal_default | 23.9 | 71.4 @ 3 | 5 | 17 |
+| RS(32,16) | decode | 2 | isal_default | 23.7 | 71.0 @ 3 | 5 | 17 |
+| RS(32,16) | decode | 1 | ours_avx2 | 195.5 | 564.5 @ 3 | 1 | 3 |
+| RS(32,16) | decode | 2 | ours_avx2 | 157.5 | 467.0 @ 3 | 1 | 3 |
+| RS(32,16) | decode | 1 | ours_avx512 | 208.6 | 594.0 @ 3 | 1 | 3 |
+| RS(32,16) | decode | 2 | ours_avx512 | 181.6 | 529.9 @ 3 | 1 | 3 |
+| RS(32,16) | encode | - | cm256 | 20.8 | 62.3 @ 3 | 5 | 20 |
+| RS(32,16) | encode | - | isal_avx2 | 25.6 | 76.8 @ 3 | 4 | 16 |
+| RS(32,16) | encode | - | isal_avx512 | 29.1 | 87.5 @ 3 | 4 | 14 |
+| RS(32,16) | encode | - | isal_default | 87.6 | 262.8 @ 3 | 2 | 5 |
+| RS(32,16) | encode | - | ours_avx2 | 31.2 | 93.5 @ 3 | 4 | 13 |
+| RS(32,16) | encode | - | ours_avx512 | 50.3 | 150.1 @ 3 | 2 | 8 |
+| RS(36,32) | decode | 1 | cm256 | 255.6 | 744.2 @ 3 | 1 | 2 |
+| RS(36,32) | decode | 2 | cm256 | 156.6 | 456.2 @ 3 | 1 | 3 |
+| RS(36,32) | decode | 1 | isal_avx2 | 6.3 | 19.0 @ 3 | 16 | 64 |
+| RS(36,32) | decode | 2 | isal_avx2 | 6.3 | 18.8 @ 3 | 16 | 64 |
+| RS(36,32) | decode | 1 | isal_avx512 | 6.3 | 19.0 @ 3 | 16 | 64 |
+| RS(36,32) | decode | 2 | isal_avx512 | 6.4 | 19.0 @ 3 | 16 | 64 |
+| RS(36,32) | decode | 1 | isal_default | 6.4 | 19.0 @ 3 | 16 | 64 |
+| RS(36,32) | decode | 2 | isal_default | 6.5 | 19.3 @ 3 | 16 | 63 |
+| RS(36,32) | decode | 1 | ours_avx2 | 191.1 | 560.6 @ 3 | 1 | 3 |
+| RS(36,32) | decode | 2 | ours_avx2 | 153.6 | 456.7 @ 3 | 1 | 3 |
+| RS(36,32) | decode | 1 | ours_avx512 | 207.0 | 598.5 @ 3 | 1 | 3 |
+| RS(36,32) | decode | 2 | ours_avx512 | 176.4 | 517.9 @ 3 | 1 | 3 |
+| RS(36,32) | encode | - | cm256 | 73.4 | 237.2 @ 3 | 2 | 6 |
+| RS(36,32) | encode | - | isal_avx2 | 91.5 | 276.5 @ 3 | 2 | 5 |
+| RS(36,32) | encode | - | isal_avx512 | 110.0 | 330.3 @ 3 | 1 | 4 |
+| RS(36,32) | encode | - | isal_default | 202.0 | 593.0 @ 3 | 1 | 3 |
+| RS(36,32) | encode | - | ours_avx2 | 116.3 | 346.4 @ 3 | 1 | 4 |
+| RS(36,32) | encode | - | ours_avx512 | 158.9 | 460.1 @ 3 | 1 | 3 |
+
+Cores for X Gbps = ceil(X / per-core rate at the largest measured thread count); beyond the measured range this assumes linear scaling.
+
+>> done: results/ip-172-31-22-156-20261030-0546
