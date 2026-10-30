@@ -10,7 +10,7 @@
 CXX      ?= g++
 CXXFLAGS ?= -std=c++17 -O3 -Wall -Wextra
 ISAL_TAG ?= v2.31.0
-# cm256 (public domain) pinned to a known commit; built with -mavx2 so its gf256 uses AVX2
+# cm256 (BSD-3-Clause) pinned to a known commit; built with -mavx2 so its gf256 uses AVX2
 CM256_DIR ?= cm256-src
 CM256_REV ?= 634d1e36b095dbba937586a7e9843d828762dae4
 CM256_OBJS = $(CM256_DIR)/cm256.o $(CM256_DIR)/gf256.o
